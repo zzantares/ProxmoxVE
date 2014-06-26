@@ -16,7 +16,14 @@ class ProxmoxVETest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->credentials = new Credentials('myproxmox.tld', 'root', 'abc123');
-        $this->proxmox = new ProxmoxVE($this->credentials);
+
+        $this->proxmox = $this->getMockBuilder('ZzAntares\ProxmoxVE\ProxmoxVE')
+                        ->disableOriginalConstructor()
+                        ->getMock();
+
+        $this->proxmox->expects($this->any())
+            ->method('getCredentials')
+            ->will($this->returnValue($this->credentials));
     }
 
 

@@ -27,7 +27,7 @@ Or add this to your `composer.json` file:
 
 Then perform the installation:
 ```sh
-$ composer install
+$ composer install --no-dev
 ```
 
 Usage
