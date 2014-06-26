@@ -34,21 +34,27 @@ Usage
 -----
 
 ```php
+<?php
+
 // Require the autoloader
 require_once 'vendor/autoload.php';
+
+// Use the library namespaces
+use ZzAntares\ProxmoxVE\Credentials;
+use ZzAntares\ProxmoxVE\ProxmoxVE;
 
 $server = 'your.server.tld';
 $user = 'root';
 $pass = 'secret';
 
 // Create your Credentials object
-$credentials = new ZzAntares\ProxmoxVE\Credentials($server, $user, $pass);
+$credentials = new Credentials($server, $user, $pass);
 
 // realm and port defaults to 'pam' and '8006' but you can specify them like so
-$credentials = new ZzAntares\ProxmoxVE\Credentials($server, $user, $pass, 'pve', '9009');
+$credentials = new Credentials($server, $user, $pass, 'pve', '9009');
 
 // Then simply pass your Credentials object when creating the API client object.
-$proxmox = new ZzAntares\ProxmoxVE\ProxmoxVE($credentials);
+$proxmox = new ProxmoxVE($credentials);
 
 $allNodes = $proxmox->get('/nodes');
 
@@ -86,6 +92,11 @@ Array
 For the lazy ones it's possible to create a ProxmoxVE instance passing an associative array but you need to specify all fields including realm and port:
 
 ```php
+<?php
+// Once again require the autoloader
+require_once 'vendor/autoload.php';
+
+// You can define your credentials using an array
 $credentials = array(
     'hostname' => 'your.server.tld',
     'username' => 'root',
@@ -94,7 +105,25 @@ $credentials = array(
     'port' => '8006',
 );
 
+// Create ProxmoxVE instance by passing the $credentials array
 $proxmox = new ZzAntares\ProxmoxVE\ProxmoxVE($credentials);
+
+// Then you can use it, for example create a new user.
+
+// Define params
+$params = array(
+    'userid' => 'new_user@pve',
+    'comment' => 'Creating a new user',
+    'password' => 'canyoukeepasecret?',
+);
+
+// Send request passing params
+$result = $proxmox->post('/access/users', $params);
+
+// According to the Proxmox API Docs, successful user creation returns null
+if ($result) {
+    error_log('Unable to create new proxmox user.');
+}
 ```
 
 
