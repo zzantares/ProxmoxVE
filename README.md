@@ -52,7 +52,8 @@ $proxmox = new ZzAntares\ProxmoxVE\ProxmoxVE($credentials);
 
 $allNodes = $proxmox->get('/nodes');
 
-print_r($allNodes);```
+print_r($allNodes);
+```
 
 
 Sample output:
@@ -82,7 +83,7 @@ Array
 )
 ```
 
-For the lazy ones it's possible to create a ProxmoxVE instance passing an associative array but you need to specify realm and port:
+For the lazy ones it's possible to create a ProxmoxVE instance passing an associative array but you need to specify all fields including realm and port:
 
 ```php
 $credentials = array(
@@ -100,11 +101,9 @@ $proxmox = new ZzAntares\ProxmoxVE\ProxmoxVE($credentials);
 Docs
 ----
 
-On your proxmox client object you can use `get()`, `post()`, `put()` and `delete()` functions for all resources specified at [PVE2 API Documentation].
+On your proxmox client object you can use `get()`, `post()`, `put()` and `delete()` functions for all resources specified at [PVE2 API Documentation], params are passed as second parameter in an associative array.
 
-> *How does the Proxmox API works?*
-
-> Consult the [ProxmoxVE API] article at the [Proxmox wiki].
+*How does the Proxmox API works?* Consult the [ProxmoxVE API] article at the [Proxmox wiki].
 
 
 License
@@ -120,22 +119,22 @@ If you feel guilty by using this open source software library for free, you can 
 
 [![Bitcoin](https://lh6.googleusercontent.com/-otZw6Z5QKfQ/U6tqGsLBWYI/AAAAAAAAB-8/kvXncUJKKpU/w100-h36-no/bitcoin_accepted_here2.png)](https://blockchain.info/address/12g5CxCnWTc2dfo2EozCvfhi4QaFRj1vsX)
 
-`12g5CxCnWTc2dfo2EozCvfhi4QaFRj1vsX`
+> 12g5CxCnWTc2dfo2EozCvfhi4QaFRj1vsX
 
 
 [![Litecoin](https://lh3.googleusercontent.com/-s0Z7VSNScBU/U6tqGnAU5DI/AAAAAAAAB-0/fqaowxhOoBg/w100-h36-no/litecoin-accepted2.jpg)](http://ltc.blockr.io/address/info/LZuAcxLX4CBCPfLRtixatwRh234jNm3EyS)
 
-`LZuAcxLX4CBCPfLRtixatwRh234jNm3EyS`
+> LZuAcxLX4CBCPfLRtixatwRh234jNm3EyS
 
 
 [![PayPal](https://lh5.googleusercontent.com/-bQoXNrSpb8M/U6tqGqAFQUI/AAAAAAAAB-4/OkjaZ2ZQCUc/w100-h26-no/pp-logo-100px.png)](https://www.paypal.com/mx/cgi-bin/webscr?cmd=%5fsend%2dmoney&nav=1)
 
-`zzantares@gmail.com`
+> zzantares@gmail.com
 
 
 [![Fork me on GitHub](https://lh4.googleusercontent.com/-02ApStd24fs/U6t2PxxAQVI/AAAAAAAACAE/koI2tECOE60/w81-h32-no/GitHubForkButton.png)](https://github.com/ZzAntares/ProxmoxVE/fork)
 
-`Fork and code! There is no better donation that your code contribution ;)`
+> Fork and code! There is no better donation that your code contribution ;)
 
 
 TODO
