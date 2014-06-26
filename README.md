@@ -169,6 +169,7 @@ If you feel guilty by using this open source software library for free, you can 
 TODO
 ----
 - Notify the user when a CNAME DNS record is provided as a hostname, Proxmox API seems to not work in this case.
+- Add SSL support.
 - Save AuthToken data in serialized form to avoid ticket creation per request.
 - Usage of the API need to allows you to specify return format.
 	- json

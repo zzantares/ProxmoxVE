@@ -183,7 +183,8 @@ class ProxmoxVE
         $this->apiUrl = $this->credentials->getApiUrl();
 
         if (!$this->authToken = $this->credentials->login()) {
-            throw new \RuntimeException('Can\'t connect to Proxmox Server!');
+            $error = 'Can\'t login to Proxmox Server! Check your credentials.';
+            throw new \RuntimeException($error);
         }
     }
 
