@@ -202,6 +202,17 @@ class ProxmoxVE
 
 
     /**
+     * Assign the passed Credentials object to the ProxmoxVE.
+     *
+     * @param ZzAntares\ProxmoxVE\Credentials $credentials to assign.
+     */
+    public function setCredentials($credentials)
+    {
+        $this->credentials = $credentials;
+    }
+
+
+    /**
      * Performs a GET request to the Proxmox server.
      *
      * @param string $actionPath The resource tree path you want to ask for, see

@@ -15,15 +15,18 @@ class ProxmoxVETest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        $this->credentials = new Credentials('myproxmox.tld', 'root', 'abc123');
+        $fakeToken = new AuthToken('csrf', 'ticket', 'owner');
 
-        $this->proxmox = $this->getMockBuilder('ZzAntares\ProxmoxVE\ProxmoxVE')
-                        ->disableOriginalConstructor()
-                        ->getMock();
+        $this->credentials = $this->getMockBuilder('ZzAntares\ProxmoxVE\Credentials')
+                                  ->setMethods(array('login'))
+                                  ->setConstructorArgs(array('myproxmox.tld', 'root', 'abc123'))
+                                  ->getMock();
 
-        $this->proxmox->expects($this->any())
-            ->method('getCredentials')
-            ->will($this->returnValue($this->credentials));
+        $this->credentials->expects($this->any())
+            ->method('login')
+            ->will($this->returnValue($fakeToken));
+
+        $this->proxmox = new ProxmoxVE($this->credentials);
     }
 
 
@@ -40,6 +43,15 @@ class ProxmoxVETest extends \PHPUnit_Framework_TestCase
     {
         $data = array('hostname', 'password', 'username', 'port', 'realm');
         $proxmoxApi = new ProxmoxVE($data);
+    }
+
+
+    public function testChangesCredentialsCorrectly()
+    {
+        $newCredentials = new Credentials('host', 'user', 'pass');
+        $this->proxmox->setCredentials($newCredentials);
+
+        $this->assertEquals($newCredentials, $this->proxmox->getCredentials());
     }
 
 
