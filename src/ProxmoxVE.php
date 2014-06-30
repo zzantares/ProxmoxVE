@@ -154,6 +154,11 @@ class ProxmoxVE
      */
     public function __construct($credentials)
     {
+        // Check if CURL is enabled
+        if (!function_exists('curl_version')) {
+            throw new RuntimeException('PHP5-CURL needs to be enabled!');
+        }
+
         if ($credentials instanceof Credentials) {
             $this->credentials = $credentials;
 
@@ -178,7 +183,6 @@ class ProxmoxVE
             $errorMessage = 'PVE API needs a Credentials object or an array.';
             throw new \InvalidArgumentException($errorMessage);
         }
-
 
         $this->apiUrl = $this->credentials->getApiUrl();
 
