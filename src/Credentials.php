@@ -152,8 +152,9 @@ class Credentials
      * Attempts to login using this credentials, if succeeded will return the
      * AuthToken used in all requests.
      *
-     * @return \ProxmoxVE\AuthToken|bool If login fails will return false
-     *                                   otherwise will return the AuthToken.
+     * @return \ZzAntares\ProxmoxVE\AuthToken|bool If login fails will return
+     *                                             false otherwise will return
+     *                                             the AuthToken.
      */
     public function login()
     {

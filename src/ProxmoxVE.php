@@ -151,12 +151,13 @@ class ProxmoxVE
      *                           the login data.
      *
      * @throws \RuntimeException
+     * @throws \InvalidArgumentException If bar args supplied.
      */
     public function __construct($credentials)
     {
         // Check if CURL is enabled
         if (!function_exists('curl_version')) {
-            throw new RuntimeException('PHP5-CURL needs to be enabled!');
+            throw new \RuntimeException('PHP5-CURL needs to be enabled!');
         }
 
         if ($credentials instanceof Credentials) {
