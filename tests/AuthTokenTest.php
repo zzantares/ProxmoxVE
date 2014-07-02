@@ -7,7 +7,7 @@
  * @license http://opensource.org/licenses/MIT The MIT License.
  */
 
-namespace ZzAntares\ProxmoxVE;
+namespace ProxmoxVE;
 
 /**
  * @author César Muñoz <zzantares@gmail.com>

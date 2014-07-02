@@ -7,7 +7,7 @@
  * @license http://opensource.org/licenses/MIT The MIT License.
  */
 
-namespace ZzAntares\ProxmoxVE;
+namespace ProxmoxVE;
 
 /**
  * AuthToken class. Handle all data used when talking to a promxox server like

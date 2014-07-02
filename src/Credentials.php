@@ -7,7 +7,7 @@
  * @license http://opensource.org/licenses/MIT The MIT License.
  */
 
-namespace ZzAntares\ProxmoxVE;
+namespace ProxmoxVE;
 
 /**
  * Credentials class. It will handle all related data used to connect to a

@@ -9,6 +9,8 @@ This **PHP 5.3+** library allows you to interact with your Proxmox server via AP
 [![Latest Unstable Version](https://poser.pugx.org/zzantares/proxmoxve/v/unstable.svg)](https://packagist.org/packages/zzantares/proxmoxve)
 [![License](https://poser.pugx.org/zzantares/proxmoxve/license.svg)](https://packagist.org/packages/zzantares/proxmoxve)
 
+> If you find any errors or you detect that something is not working as expected please open an [issue](https://github.com/ZzAntares/ProxmoxVE/issues/new) or tweetme [@ZzAntares](https://twitter.com/ZzAntares). I'll try to release a fix asap.
+
 Installation
 ------------
 
@@ -45,8 +47,8 @@ Usage
 require_once 'vendor/autoload.php';
 
 // Use the library namespaces
-use ZzAntares\ProxmoxVE\Credentials;
-use ZzAntares\ProxmoxVE\ProxmoxVE;
+use ProxmoxVE\Credentials;
+use ProxmoxVE\Proxmox;
 
 $server = 'your.server.tld';
 $user = 'root';
@@ -59,7 +61,7 @@ $credentials = new Credentials($server, $user, $pass);
 $credentials = new Credentials($server, $user, $pass, 'pve', '9009');
 
 // Then simply pass your Credentials object when creating the API client object.
-$proxmox = new ProxmoxVE($credentials);
+$proxmox = new Proxmox($credentials);
 
 $allNodes = $proxmox->get('/nodes');
 
@@ -111,7 +113,7 @@ $credentials = array(
 );
 
 // Create ProxmoxVE instance by passing the $credentials array
-$proxmox = new ZzAntares\ProxmoxVE\ProxmoxVE($credentials);
+$proxmox = new ProxmoxVE\Proxmox($credentials);
 
 // Then you can use it, for example create a new user.
 
@@ -123,7 +125,7 @@ $params = array(
 );
 
 // Send request passing params
-$result = $proxmox->post('/access/users', $params);
+$result = $proxmox->create('/access/users', $params);
 
 // According to the Proxmox API Docs, successful user creation returns null
 if ($result) {
@@ -135,9 +137,19 @@ if ($result) {
 Docs
 ----
 
-On your proxmox client object you can use `get()`, `post()`, `put()` and `delete()` functions for all resources specified at [PVE2 API Documentation], params are passed as second parameter in an associative array.
+On your proxmox client object you can use `get()`, `create()`, `set()` and `delete()` functions for all resources specified at [PVE2 API Documentation], params are passed as the second parameter in an associative array.
 
-*How does the Proxmox API works?* Consult the [ProxmoxVE API] article at the [Proxmox wiki].
+**What resources or paths can I interact with and how?**
+
+In your proxmox server you can use the [pvesh CLI Tool](http://pve.proxmox.com/wiki/Proxmox_VE_API#Using_.27pvesh.27_to_access_the_API) to manage all the pve resources, you can use this library in the exact same way you would use the pvesh tool. For instance you could run `pvesh` then, as the screen message should say, you can type `help [path] [--verbose]` to see how you could use a path and what params you should pass to it. Be sure to [read about the pvesh CLI Tool](http://pve.proxmox.com/wiki/Proxmox_VE_API#Using_.27pvesh.27_to_access_the_API) at the [Proxmox wiki].
+
+**How does the Proxmox API works?**
+
+Consult the [ProxmoxVE API] article at the [Proxmox wiki].
+
+**I need more docs!**
+
+See the [doc](https://github.com/ZzAntares/ProxmoxVE/tree/master/doc) directory for more detailed documentation.
 
 
 License
@@ -189,3 +201,4 @@ TODO
 [ProxmoxVE API]:http://pve.proxmox.com/wiki/Proxmox_VE_API
 [Proxmox wiki]:http://pve.proxmox.com/wiki
 [Composer]:https://getcomposer.org/
+

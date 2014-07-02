@@ -6,56 +6,30 @@
  * @license http://opensource.org/licenses/MIT The MIT License.
  */
 
-namespace ZzAntares\ProxmoxVE;
+namespace ProxmoxVE;
 
 /**
  * @author César Muñoz <zzantares@gmail.com>
  */
 class ProxmoxVETest extends \PHPUnit_Framework_TestCase
 {
-    public function setUp()
+    public function testGetAndSetAuthToken()
     {
-        $fakeToken = new AuthToken('csrf', 'ticket', 'owner');
+        $token = new AuthToken('csrf', 'ticket', 'owner');
+        $pve = new ProxmoxVE($token);
+        $this->assertSame($token, $pve->getAuthToken());
 
-        $this->credentials = $this->getMockBuilder('ZzAntares\ProxmoxVE\Credentials')
-                                  ->setMethods(array('login'))
-                                  ->setConstructorArgs(array('myproxmox.tld', 'root', 'abc123'))
-                                  ->getMock();
-
-        $this->credentials->expects($this->any())
-            ->method('login')
-            ->will($this->returnValue($fakeToken));
-
-        $this->proxmox = new ProxmoxVE($this->credentials);
+        $newToken = new AuthToken('other csrf', 'other ticket', 'other owner');
+        $pve->setAuthToken($newToken);
+        $this->assertSame($newToken, $pve->getAuthToken());
     }
 
 
-    public function testProxmoxObjectSavesTokenCorrectly()
-    {
-        $this->assertSame($this->credentials, $this->proxmox->getCredentials());
-    }
-
-
-    /**
-     * @expectedException \InvalidArgumentException
+    /* Add test to get, post, put and delete functions.
+     *
+     * Need to create mocks but they are protected, we can do it through
+     * reflection but is worth it? we should do it for sake of testing?
      */
-    public function testConstructorThrowsExceptionWhenBadParamsArePassed()
-    {
-        $data = array('hostname', 'password', 'username', 'port', 'realm');
-        $proxmoxApi = new ProxmoxVE($data);
-    }
 
-
-    public function testChangesCredentialsCorrectly()
-    {
-        $newCredentials = new Credentials('host', 'user', 'pass');
-        $this->proxmox->setCredentials($newCredentials);
-
-        $this->assertEquals($newCredentials, $this->proxmox->getCredentials());
-    }
-
-
-    /*
-     * Add test for get, post, put and delete functions. Need to create mocks. 
-     */
 }
+
