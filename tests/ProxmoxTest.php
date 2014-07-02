@@ -13,45 +13,32 @@ namespace ProxmoxVE;
  */
 class ProxmoxTest extends \PHPUnit_Framework_TestCase
 {
-    public function setUp()
+    public function getMockCredentials($constructArgs = array())
     {
+        $mockCredentials = $this->getMockBuilder('ProxmoxVE\Credentials')
+                                ->setMethods(array('login'))
+                                ->setConstructorArgs($constructArgs)
+                                ->getMock();
+
         $fakeToken = new AuthToken('csrf', 'ticket', 'owner');
 
-        $this->credentials = $this->getMockBuilder('ProxmoxVE\Credentials')
-                                  ->setMethods(array('login'))
-                                  ->setConstructorArgs(array('myproxmox.tld', 'root', 'abc123'))
-                                  ->getMock();
+        $mockCredentials->expects($this->any())
+                        ->method('login')
+                        ->will($this->returnValue($fakeToken));
 
-        $this->credentials->expects($this->any())
-            ->method('login')
-            ->will($this->returnValue($fakeToken));
-
-        $this->proxmox = new Proxmox($this->credentials);
+        return $mockCredentials;
     }
 
 
-    public function testGetCredentials()
+    public function testGetAndSetCredentials()
     {
-        $this->assertSame($this->credentials, $this->proxmox->getCredentials());
-    }
+        $credentials = $this->getMockCredentials(array('my.proxmox.tld', 'root', '123abc'));
+        $proxmox = new Proxmox($credentials);
+        $this->assertSame($credentials, $proxmox->getCredentials());
 
-
-    public function testSetCredentials()
-    {
-        $fakeToken = new AuthToken('csrf', 'ticket', 'owner');
-
-        $newCredentials = $this->getMockBuilder('ProxmoxVE\Credentials')
-                               ->setMethods(array('login'))
-                               ->setConstructorArgs(array('host', 'user', 'pass'))
-                               ->getMock();
-
-        $newCredentials->expects($this->any())
-                       ->method('login')
-                       ->will($this->returnValue($fakeToken));
-
-        $this->proxmox->setCredentials($newCredentials);
-
-        $this->assertEquals($newCredentials, $this->proxmox->getCredentials());
+        $newCredentials = $this->getMockCredentials(array('host', 'user', 'pass'));
+        $proxmox->setCredentials($newCredentials);
+        $this->assertEquals($newCredentials, $proxmox->getCredentials());
     }
 
 
