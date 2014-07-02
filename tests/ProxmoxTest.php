@@ -13,18 +13,23 @@ namespace ProxmoxVE;
  */
 class ProxmoxTest extends \PHPUnit_Framework_TestCase
 {
-    public function getMockCredentials($constructArgs = array())
+    public function getMockCredentials($constructArgs = array(), $fail = false)
     {
         $mockCredentials = $this->getMockBuilder('ProxmoxVE\Credentials')
                                 ->setMethods(array('login'))
                                 ->setConstructorArgs($constructArgs)
                                 ->getMock();
 
-        $fakeToken = new AuthToken('csrf', 'ticket', 'owner');
-
-        $mockCredentials->expects($this->any())
-                        ->method('login')
-                        ->will($this->returnValue($fakeToken));
+        if ($fail) {
+            $mockCredentials->expects($this->any())
+                            ->method('login')
+                            ->will($this->returnValue(false));
+        } else {
+            $fakeToken = new AuthToken('csrf', 'ticket', 'owner');
+            $mockCredentials->expects($this->any())
+                            ->method('login')
+                            ->will($this->returnValue($fakeToken));
+        }
 
         return $mockCredentials;
     }
@@ -43,9 +48,32 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
 
 
     /**
+     * @expectedException \RuntimeException
+     */
+    public function testGivingWrongCredentialsMustThrowAnException()
+    {
+        $credentials = $this->getMockCredentials(array('put', 'three', 'values'), true);
+        $proxmox = new Proxmox($credentials);
+    }
+
+
+    /**
+     * @expectedException \RuntimeException
+     */
+    public function testSettingWrongCredentialsMustThrowAnException()
+    {
+        $credentials = $this->getMockCredentials(array('using', 'demo', 'data'));
+        $proxmox = new Proxmox($credentials);
+
+        $newCredentials = $this->getMockCredentials(array('bad', 'user', 'pass'), true);
+        $proxmox->setCredentials($newCredentials);
+    }
+
+
+    /**
      * @expectedException \InvalidArgumentException
      */
-    public function testConstructorThrowsExceptionWhenBadParamsArePassed()
+    public function testConstructorThrowsExceptionWhenWrongParamsPassed()
     {
         $data = array('hostname', 'password', 'username', 'port', 'realm');
         $proxmoxApi = new Proxmox($data);

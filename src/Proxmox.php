@@ -99,7 +99,7 @@ class Proxmox extends ProxmoxVE
      *
      * @param ProxmoxVE\Credentials $credentials to assign.
      */
-    public function setCredentials($credentials)
+    public function setCredentials(Credentials $credentials)
     {
         $this->credentials = $credentials;
         $token = $credentials->login();
