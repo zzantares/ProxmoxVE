@@ -1,5 +1,5 @@
 ProxmoxVE API Client
-========================
+====================
 
 This **PHP 5.3+** library allows you to interact with your Proxmox server via API.
 
@@ -119,7 +119,7 @@ $proxmox = new ProxmoxVE\Proxmox($credentials);
 
 // Define params
 $params = array(
-    'userid' => 'new_user@pve',
+    'userid' => 'new_user@pve',  // Proxmox requires to specify the realm (see the docs)
     'comment' => 'Creating a new user',
     'password' => 'canyoukeepasecret?',
 );
@@ -127,9 +127,14 @@ $params = array(
 // Send request passing params
 $result = $proxmox->create('/access/users', $params);
 
-// According to the Proxmox API Docs, successful user creation returns null
-if ($result) {
+// If an error occurred the 'errors' key will exist in the response array
+if (isset($result['errors'])) {
     error_log('Unable to create new proxmox user.');
+    foreach ($result['errors'] as $title => $description) {
+        error_log($title . ': ' . $description);
+    }
+} else {
+    echo 'Successful user creation!';
 }
 ```
 

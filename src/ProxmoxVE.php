@@ -91,13 +91,7 @@ class ProxmoxVE
         curl_setopt($curlSession, CURLOPT_CONNECTTIMEOUT, self::TIMEOUT);
 
         $response = curl_exec($curlSession);
-        $statusCode = curl_getinfo($curlSession, CURLINFO_HTTP_CODE);
         curl_close($curlSession);
-
-        if ($statusCode >= 300) {
-            $error = "Error sending request to {$url}.\nResponse code was: ";
-            throw new \RuntimeException($error . $statusCode);
-        }
 
         // Never parse response, that depends on the API response type.
         return $response;
