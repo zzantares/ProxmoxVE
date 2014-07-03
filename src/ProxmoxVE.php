@@ -45,9 +45,6 @@ class ProxmoxVE
      *                        cookies are separated with '; ' (note the space
      *                        after the semicolon).
      *
-     * @throws RuntimeException If request can't be sent or no response was
-     *                          received.
-     *
      * @return string The response that server send back.
      */
     public static function request(

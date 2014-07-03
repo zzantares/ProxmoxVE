@@ -19,7 +19,7 @@ Recomended installation is using [Composer], if you do not have [Composer] what 
 In the root of your project execute the following:
 
 ```sh
-$ composer require zzantares/proxmoxve ~1.0
+$ composer require zzantares/proxmoxve ~2.0
 ```
 
 Or add this to your `composer.json` file:
@@ -27,7 +27,7 @@ Or add this to your `composer.json` file:
 ```json
 {
     "require": {
-        "zzantares/proxmoxve": "~1.0"
+        "zzantares/proxmoxve": "~2.0"
     }
 }
 ```
