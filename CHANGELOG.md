@@ -2,7 +2,7 @@ v2.0.0
 ------
 
 - Now it is possible to specify the desired return type when creating Proxmox object, setters and getters for return type were added.
-
+- Added docs about getters & setters of the Proxmox client object.
 
 v2.0.0
 ------

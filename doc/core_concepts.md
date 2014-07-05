@@ -36,6 +36,107 @@ Then perform the installation:
 $ composer install --no-dev
 ```
 
+Basic usage
+-----------
+
+```php
+<?php
+
+// Require the autoloader
+require_once 'vendor/autoload.php';
+
+// Use the library namespaces
+use ProxmoxVE\Credentials;
+use ProxmoxVE\Proxmox;
+
+$server = 'your.server.tld';
+$user = 'root';
+$pass = 'secret';
+
+// Create your Credentials object
+$credentials = new Credentials($server, $user, $pass);
+
+// realm and port defaults to 'pam' and '8006' but you can specify them like so
+$credentials = new Credentials($server, $user, $pass, 'pve', '9009');
+
+// Then simply pass your Credentials object when creating the API client object.
+$proxmox = new Proxmox($credentials);
+
+$allNodes = $proxmox->get('/nodes');
+
+print_r($allNodes);
+```
+
+
+Sample output:
+
+```php
+Array
+(
+    [data] => Array
+        (
+            [0] => Array
+                (
+                    [disk] => 2539465464
+                    [cpu] => 0.031314446882002
+                    [maxdisk] => 30805066770
+                    [maxmem] => 175168446464
+                    [node] => mynode1
+                    [maxcpu] => 24
+                    [level] => 
+                    [uptime] => 139376
+                    [id] => node/mynode1
+                    [type] => node
+                    [mem] => 20601992182
+                )
+
+        )
+
+)
+```
+
+For the lazy ones it's possible to create a ProxmoxVE instance passing an associative array but you need to specify all fields including *realm* and *port*:
+
+```php
+<?php
+// Once again require the autoloader
+require_once 'vendor/autoload.php';
+
+// You can define your credentials using an array
+$credentials = array(
+    'hostname' => 'your.server.tld',
+    'username' => 'root',
+    'password' => 'secret',
+    'realm' => 'pam',
+    'port' => '8006',
+);
+
+// Create ProxmoxVE instance by passing the $credentials array
+$proxmox = new ProxmoxVE\Proxmox($credentials);
+
+// Then you can use it, for example create a new user.
+
+// Define params
+$params = array(
+    'userid' => 'new_user@pve',  // Proxmox requires to specify the realm (see the docs)
+    'comment' => 'Creating a new user',
+    'password' => 'canyoukeepasecret?',
+);
+
+// Send request passing params
+$result = $proxmox->create('/access/users', $params);
+
+// If an error occurred the 'errors' key will exist in the response array
+if (isset($result['errors'])) {
+    error_log('Unable to create new proxmox user.');
+    foreach ($result['errors'] as $title => $description) {
+        error_log($title . ': ' . $description);
+    }
+} else {
+    echo 'Successful user creation!';
+}
+```
+
 
 Available functions
 -------------------
@@ -48,6 +149,69 @@ On your proxmox client object you can use `get()`, `create()`, `set()` and `dele
 - [Read more about set() function](https://github.com/ZzAntares/ProxmoxVE/blob/master/doc/set.md).
 - [Read more about delete() function](https://github.com/ZzAntares/ProxmoxVE/blob/master/doc/delete.md).
 
+
+Also any ProxmoxVE object has this functions that might be useful to you:
+
+
+Set and get credentials
+-----------------------
+
+Some times your program will need to query multiple proxmox servers. You can use `setCredentials()` function to change the server that the library is talking to.
+    
+```php
+<?php
+require_once 'vendor/autoload.php';
+
+$serverA = new ProxmoxVE\Credentials('hostA', 'userA', 'passwdA');
+$proxmox = new ProxmoxVE\Proxmox($serverA);  // API object created only once
+
+// Get nodes on server A
+$proxmox->get('/nodes');
+
+$serverB = new ProxmoxVE\Credentials('hostB', 'userB', 'passwdB');
+$proxmox->setCredentials($serverB);
+
+// After that every communication is sent to the new server
+
+$proxmox->get('/nodes');  // Get nodes on server B
+
+// Also you can call getCredentials for whatever reason
+$credentialsB = $proxmox->getCredentials();
+
+echo 'Hostname: ' . $credentialsB->getHostname();  // Hostname: hostB
+```
+
+
+Set and get response type
+-------------------------
+
+You must now that the proxmox webservice API can give you responses in *json*, *extjs*, *html*, *text* and secretely *png* for server graphics. You can specify the response format using `setResponseType()` function.
+
+```php
+<?php
+require_once 'vendor/autoload.php';
+
+$serverCredentials = new ProxmoxVE\Credentials('hostA', 'userA', 'passwdA');
+
+// You can specify format as 2nd argument when creating API client object.
+$proxmox = new ProxmoxVE\Proxmox($serverCredentials, 'html');
+
+// Ask for nodes, gives back a PHP string with HTML response
+$proxmox->get('/nodes');
+
+// Change response type to JSON
+$proxmox->setResponseType('json');
+
+// Now asking for nodes gives back PHP array
+$proxmox->get('/nodes');
+
+// What if I need the JSON raw string? Good question I'm still thinking of it
+
+// Also you can call getResponseType for whatever reason have
+$format = $proxmox->getResponseType();  // json
+```
+
+If no response format is specified when creating the API client object, *json* will be used by default, which will give you a PHP array as response.
 
 FAQ
 ---
