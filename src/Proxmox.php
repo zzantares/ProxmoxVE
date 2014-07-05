@@ -35,6 +35,15 @@ class Proxmox extends ProxmoxVE
 
 
     /**
+     * Holds the response type used to requests the API, possible values are
+     * json, extjs, html, text, png.
+     *
+     * @var string
+     */
+    protected $responseType;
+
+
+    /**
      * Constructor.
      *
      * @param mixed $credentials Credentials object or associative array holding
@@ -42,7 +51,7 @@ class Proxmox extends ProxmoxVE
      *
      * @throws \InvalidArgumentException If bad args supplied.
      */
-    public function __construct($credentials)
+    public function __construct($credentials, $responseType = 'json')
     {
         if ($credentials instanceof Credentials) {
             $this->credentials = $credentials;
@@ -69,7 +78,9 @@ class Proxmox extends ProxmoxVE
             throw new \InvalidArgumentException($errorMessage);
         }
 
-        $this->apiUrl = $this->credentials->getApiUrl();
+
+        $this->setResponseType($responseType);
+        $this->apiUrl = $this->getApiUrl();
         
         $authToken = $this->credentials->login();
 
@@ -79,6 +90,35 @@ class Proxmox extends ProxmoxVE
         }
 
         parent::__construct($authToken);
+    }
+
+
+    /**
+     * Sets the response type that is going to be returned when doing requests.
+     *
+     * @param string $responseType One of json, html, extjs, text, png.
+     */
+    public function setResponseType($responseType)
+    {
+        $supportedFormats = array('json', 'html', 'extjs', 'text', 'png');
+
+        if (!in_array($responseType, $supportedFormats)) {
+            $this->responseType = 'json';
+            return;
+        }
+
+        $this->responseType = $responseType;
+    }
+
+
+    /**
+     * Returns the response type that is being used by the Proxmox API client.
+     *
+     * @return string Response type being used.
+     */
+    public function getResponseType()
+    {
+        return $this->responseType;
     }
 
 
@@ -223,5 +263,16 @@ class Proxmox extends ProxmoxVE
         return parent::delete($url, $params);
     }
 
+
+    /**
+     * Returns the proxmox API URL where requests are sended.
+     *
+     * @return string Proxmox API URL.
+     */
+    public function getApiUrl()
+    {
+        return 'https://' . $this->credentials->getHostname() . ':'
+            . $this->credentials->getPort() . '/api2/' . $this->responseType;
+    }
 }
 

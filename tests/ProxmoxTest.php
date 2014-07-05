@@ -79,4 +79,23 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
         $proxmoxApi = new Proxmox($data);
     }
 
+
+    public function testGetApiUrlWithResponseType()
+    {
+        $host = 'host';
+        $port = '8006';
+
+        $credentials = $this->getMockCredentials(array($host, 'user', 'passwd'));
+        $apiUrl = 'https://' . $host . ':' . $port . '/api2/';
+
+        $proxmox = new Proxmox($credentials);
+        $this->assertEquals($apiUrl . 'json', $proxmox->getApiUrl());
+
+        $proxmox = new Proxmox($credentials, 'png');
+        $this->assertEquals($apiUrl . 'png', $proxmox->getApiUrl());
+
+        $proxmox = new Proxmox($credentials, 'non-existant');
+        $this->assertEquals($apiUrl . 'json', $proxmox->getApiUrl());
+    }
 }
+
