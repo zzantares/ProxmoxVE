@@ -35,6 +35,22 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
     }
 
 
+    public function getMockProxmox($constructArgs = array())
+    {
+        $credentials = $this->getMockCredentials(array('host', 'user', 'pass'));
+        $proxmox = $this->getMockBuilder('ProxmoxVE\Proxmox')
+                        ->setMethods(array('processResponse'))
+                        ->setConstructorArgs(array($credentials))
+                        ->getMock();
+
+        $proxmox->expects($this->any())
+                ->method('processResponse')
+                ->will($this->returnValue(null));
+
+        return $proxmox;
+    }
+
+
     public function testGetAndSetCredentials()
     {
         $credentials = $this->getMockCredentials(array('my.proxmox.tld', 'root', '123abc'));
@@ -96,6 +112,66 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
 
         $proxmox = new Proxmox($credentials, 'non-existant');
         $this->assertEquals($apiUrl . 'json', $proxmox->getApiUrl());
+    }
+
+
+    public function testSettingResponseType()
+    {
+        $credentials = $this->getMockCredentials(array('host', 'user', 'passwd'));
+        $proxmox = new Proxmox($credentials);
+        $this->assertEquals($proxmox->getResponseType(), 'array');
+
+        $proxmox->setResponseType('json');
+        $this->assertEquals($proxmox->getResponseType(), 'json');
+
+        $proxmox->setResponseType('non-existant');
+        $this->assertEquals($proxmox->getResponseType(), 'array');
+
+        $proxmox->setResponseType('png');
+        $this->assertEquals($proxmox->getResponseType(), 'png');
+
+        $proxmox->setResponseType('pngb64');
+        $this->assertEquals($proxmox->getResponseType(), 'pngb64');
+    }
+
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGettingResourcesThrowsExceptionWhenWrongParamsGiven()
+    {
+        $proxmox = $this->getMockProxmox(array('host', 'user', 'passwd'));
+        $proxmox->get('/nodes', 'bad param');
+    }
+
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testSettingResourcesThrowsExceptionWhenWrongParamsGiven()
+    {
+        $proxmox = $this->getMockProxmox(array('host', 'user', 'passwd'));
+        $proxmox->set('/access/users/bob@pve', 'bad param');
+    }
+
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testCreattingResourcesThrowsExceptionWhenWrongParamsGiven()
+    {
+        $proxmox = $this->getMockProxmox(array('host', 'user', 'passwd'));
+        $proxmox->create('/access/users', 'bad param');
+    }
+
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testDelettingResourcesThrowsExceptionWhenWrongParamsGiven()
+    {
+        $proxmox = $this->getMockProxmox(array('host', 'user', 'passwd'));
+        $proxmox->delete('/access/users/user@realm', 'bad param');
     }
 }
 

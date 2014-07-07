@@ -95,7 +95,7 @@ Array
 )
 ```
 
-For the lazy ones it's possible to create a ProxmoxVE instance passing an associative array but you need to specify all fields including *realm* and *port*:
+For the lazy ones it is possible to create a ProxmoxVE instance passing an associative array but you need to specify all fields including *realm* and *port*:
 
 ```php
 <?php
@@ -191,7 +191,7 @@ You must now that the proxmox webservice API can give you responses in *json*, *
 <?php
 require_once 'vendor/autoload.php';
 
-$serverCredentials = new ProxmoxVE\Credentials('hostA', 'userA', 'passwdA');
+$serverCredentials = new ProxmoxVE\Credentials('host', 'user', 'passwd');
 
 // You can specify format as 2nd argument when creating API client object.
 $proxmox = new ProxmoxVE\Proxmox($serverCredentials, 'html');
@@ -202,16 +202,42 @@ $proxmox->get('/nodes');
 // Change response type to JSON
 $proxmox->setResponseType('json');
 
-// Now asking for nodes gives back PHP array
+// Now asking for nodes gives back JSON raw string
 $proxmox->get('/nodes');
 
-// What if I need the JSON raw string? Good question I'm still thinking of it
+// If you want again return PHP arrays you can use the 'array' format.
+$proxmox->setResponseType('array');
 
 // Also you can call getResponseType for whatever reason have
-$format = $proxmox->getResponseType();  // json
+$format = $proxmox->getResponseType();  // array
 ```
 
-If no response format is specified when creating the API client object, *json* will be used by default, which will give you a PHP array as response.
+This library can respond in 2 extra formats, *array* and *pngb64*. If no response format is specified when creating the API client object, *array* will be used by default, which will give you back a PHP array as response.
+
+```php
+<?php
+require_once 'vendor/autoload.php';
+
+$serverCredentials = new ProxmoxVE\Credentials('host', 'user', 'passwd');
+
+// You can specify format as 2nd argument when creating API client object.
+$proxmox = new ProxmoxVE\Proxmox($serverCredentials, 'png');
+
+// Because querying '/nodes' does not return PNG this will give you errrors.
+$proxmox->get('/nodes');
+
+// Asking for a PNG resource will give you back binary data.
+$binaryPNG = $proxmox->get('/nodes/mynode/rrd', array('ds' => 'cpu', 'timeframe' => 'day'));
+
+// It is common to fetch images and then use base64 to display the image easily
+$proxmox->setResponseType('pngb64');  // format: data:image/png;base64,iVBORw0KGgoAAAA...
+$base64 = $proxmox->get('/nodes/mynode/rrd', array('ds' => 'cpu', 'timeframe' => 'day'));
+
+// 'array' it is used as default response type when unrecognized or no format is specified.
+$proxmox->setResponseType();  // sets response type to 'array'
+$proxmox->setResponseType('McDonalds');  // Also sets response type to 'array'
+```
+
 
 FAQ
 ---

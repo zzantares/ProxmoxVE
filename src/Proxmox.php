@@ -22,7 +22,7 @@ class Proxmox extends ProxmoxVE
      *
      * @var \ProxmoxVE\Credentials
      */
-    protected $credentials;
+    private $credentials;
 
 
     /**
@@ -31,7 +31,7 @@ class Proxmox extends ProxmoxVE
      *
      * @var string
      */
-    protected $apiUrl;
+    private $apiUrl;
 
 
     /**
@@ -40,7 +40,16 @@ class Proxmox extends ProxmoxVE
      *
      * @var string
      */
-    protected $responseType;
+    private $responseType;
+
+
+    /**
+     * Holds the fake response type, it is useful when you want to get the JSON
+     * raw string instead of a PHP array.
+     *
+     * @var string
+     */
+    private $fakeType;
 
 
     /**
@@ -51,7 +60,7 @@ class Proxmox extends ProxmoxVE
      *
      * @throws \InvalidArgumentException If bad args supplied.
      */
-    public function __construct($credentials, $responseType = 'json')
+    public function __construct($credentials, $responseType = 'array')
     {
         if ($credentials instanceof Credentials) {
             $this->credentials = $credentials;
@@ -81,7 +90,7 @@ class Proxmox extends ProxmoxVE
 
         $this->setResponseType($responseType);
         $this->apiUrl = $this->getApiUrl();
-        
+
         $authToken = $this->credentials->login();
 
         if (!$authToken) {
@@ -98,15 +107,29 @@ class Proxmox extends ProxmoxVE
      *
      * @param string $responseType One of json, html, extjs, text, png.
      */
-    public function setResponseType($responseType)
+    public function setResponseType($responseType = 'array')
     {
         $supportedFormats = array('json', 'html', 'extjs', 'text', 'png');
 
         if (!in_array($responseType, $supportedFormats)) {
+            if ($responseType == 'pngb64') {
+                $this->fakeType = 'pngb64';
+                $this->responseType = 'png';
+                return;
+            }
+
             $this->responseType = 'json';
+
+            if ($responseType == 'object') {
+                $this->fakeType = $responseType;
+            } else {
+                $this->fakeType = 'array';  // Default format
+            }
+
             return;
         }
 
+        $this->fakeType = false;
         $this->responseType = $responseType;
     }
 
@@ -118,7 +141,7 @@ class Proxmox extends ProxmoxVE
      */
     public function getResponseType()
     {
-        return $this->responseType;
+        return $this->fakeType ?: $this->responseType;
     }
 
 
@@ -175,7 +198,7 @@ class Proxmox extends ProxmoxVE
 
         $url = $this->apiUrl . $actionPath;
 
-        return parent::get($url, $params);
+        return $this->processResponse(parent::get($url, $params));
     }
 
 
@@ -203,7 +226,7 @@ class Proxmox extends ProxmoxVE
 
         $url = $this->apiUrl . $actionPath;
 
-        return parent::put($url, $params);
+        return $this->processResponse(parent::put($url, $params));
     }
 
 
@@ -232,7 +255,7 @@ class Proxmox extends ProxmoxVE
 
         $url = $this->apiUrl . $actionPath;
 
-        return parent::post($url, $params);
+        return $this->processResponse(parent::post($url, $params));
     }
 
 
@@ -260,7 +283,7 @@ class Proxmox extends ProxmoxVE
 
         $url = $this->apiUrl . $actionPath;
 
-        return parent::delete($url, $params);
+        return $this->processResponse(parent::delete($url, $params));
     }
 
 
@@ -274,5 +297,31 @@ class Proxmox extends ProxmoxVE
         return 'https://' . $this->credentials->getHostname() . ':'
             . $this->credentials->getPort() . '/api2/' . $this->responseType;
     }
+
+
+    /**
+     * Parses the response to the desired return type.
+     *
+     * @param string $response Response sended by the Proxmox server.
+     *
+     * @return mixed The parsed response.
+     */
+    public function processResponse($response)
+    {
+        if ($this->fakeType) {
+            if ($this->fakeType == 'pngb64') {
+                $base64 = base64_encode($response);
+                return 'data:image/png;base64,' . $base64;
+            }
+
+            // For now 'object' is not supported, so we return array by default.
+            return json_decode($response, true);
+            // Later on need to add a check to see if is 'array' or 'object'
+        }
+
+        // Other types of response doesn't need any treatment
+        return $response;
+    }
+
 }
 
