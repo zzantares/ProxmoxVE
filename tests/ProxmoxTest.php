@@ -64,6 +64,15 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
 
 
     /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testPassingWrongCredentialsObjectThrowsException()
+    {
+        $proxmox = new Proxmox('bad params');
+    }
+
+
+    /**
      * @expectedException \RuntimeException
      */
     public function testGivingWrongCredentialsMustThrowAnException()
@@ -173,5 +182,47 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
         $proxmox = $this->getMockProxmox(array('host', 'user', 'passwd'));
         $proxmox->delete('/access/users/user@realm', 'bad param');
     }
+
+
+    public function testProcessResponse()
+    {
+        $credentials = $this->getMockCredentials(array('host', 'user', 'pass'));
+        $proxmox = new Proxmox($credentials);
+
+        $json = '{"data":{"vmid":"4242"}}';
+        $this->assertEquals(json_decode($json, true), $proxmox->processResponse($json));
+
+        $proxmox->setResponseType('json');
+        $this->assertEquals($json, $proxmox->processResponse($json));
+
+        $proxmox->setResponseType('non-existant');
+        $this->assertEquals(json_decode($json, true), $proxmox->processResponse($json));
+
+        $emptyPNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAADElEQVR4nGP4//8/AAX+Av4N70a4AAAAAElFTkSuQmCC';
+        $proxmox->setResponseType('pngb64');
+        $this->assertEquals('data:image/png;base64,' . $emptyPNG, $proxmox->processResponse(base64_decode($emptyPNG)));
+
+        $proxmox->setResponseType('png');
+        $this->assertEquals(base64_decode($emptyPNG), $proxmox->processResponse(base64_decode($emptyPNG)));
+    }
+
+
+    public function testValidCredentialsObjectFunction()
+    {
+        $credentials = $this->getMockCredentials(array('host', 'user', 'pass'));
+        $proxmox = new Proxmox($credentials);
+
+        $propertiesCredentials = new CustomCredentials\PropertiesCredentials('host', 'user', 'pass', 'realm', 'port');
+        $methodsCredentials = new CustomCredentials\MethodsCredentials('host', 'user', 'pass', 'realm', 'port');
+
+        $this->assertFalse($proxmox->validCredentialsObject('not an object'));
+        $this->assertTrue($proxmox->validCredentialsObject($propertiesCredentials));
+        $this->assertTrue($proxmox->validCredentialsObject($methodsCredentials));
+    }
+
+
+    /**
+     * Probar que se pueda usar CustomCredentials con campos realm y port optativos
+     */
 }
 

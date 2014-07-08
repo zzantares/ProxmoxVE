@@ -53,6 +53,15 @@ class Proxmox extends ProxmoxVE
 
 
     /**
+     * Tells if the custom credentials object is accesible by using 'properties'
+     * of by getter 'methods'.
+     *
+     * @var string
+     */
+    private $accessibleBy;
+
+
+    /**
      * Constructor.
      *
      * @param mixed $credentials Credentials object or associative array holding
@@ -83,10 +92,13 @@ class Proxmox extends ProxmoxVE
             );
 
         } else {
-            $errorMessage = 'PVE API needs a Credentials object or an array.';
-            throw new \InvalidArgumentException($errorMessage);
-        }
+            if (!$this->validCredentialsObject($credentials)) {
+                $errorMessage = 'PVE API needs a Credentials object or array.';
+                throw new \InvalidArgumentException($errorMessage);
+            }
 
+            $this->credentials = $this->loginUsingCredentials($credentials);
+        }
 
         $this->setResponseType($responseType);
         $this->apiUrl = $this->getApiUrl();
@@ -287,6 +299,9 @@ class Proxmox extends ProxmoxVE
     }
 
 
+    // Later on below this line we'll move this logic to another place?
+
+
     /**
      * Returns the proxmox API URL where requests are sended.
      *
@@ -304,7 +319,8 @@ class Proxmox extends ProxmoxVE
      *
      * @param string $response Response sended by the Proxmox server.
      *
-     * @return mixed The parsed response.
+     * @return mixed The parsed response, depending on the response type can be
+     *               an array or a string.
      */
     public function processResponse($response)
     {
@@ -323,5 +339,108 @@ class Proxmox extends ProxmoxVE
         return $response;
     }
 
+
+    /**
+     * Attempts to validate an object to see if can be used as a credentials
+     * provider. This is helpful in the case you have an Eloquent model that
+     * already acts as a credentials object.
+     *
+     * @param object $credentials Object with accessible properties or getters.
+     *
+     * @return bool false If the object can't be used as a credentials provider.
+     */
+    public function validCredentialsObject($credentials)
+    {
+        if (!is_object($credentials)) {
+            $this->accessibleBy = false;
+            return false;
+        }
+
+        // Trying to find variables
+        $vars = array_keys(get_object_vars($credentials));
+        $properties = array(
+            'hostname',
+            'username',
+            'password',
+        );
+
+        // Needed properties exists in the object?
+        $found = count(array_intersect($properties, $vars));
+        if ($found == count($properties)) {
+            $this->accessibleBy = 'properties';
+            return true;
+        }
+
+        // Trying to find getters
+        $methods = get_class_methods($credentials);
+        $functions = array(
+            'getHostname',
+            'getUsername',
+            'getPassword',
+        );
+
+        // Needed functions exists in the object?
+        $found = count(array_intersect($functions, $methods));
+        if ($found == count($functions)) {
+            $this->accessibleBy = 'methods';
+            return true;
+        }
+
+        $this->accessibleBy = false;
+        return false;
+    }
+
+
+    /**
+     * When a custom object is used as a credentials object this function will
+     * attempt to login to the Proxmox server. Later on, logic will be rewritten
+     * to not depend on the Credentials class.
+     *
+     * @param object $credentials A custom object holding proxmox login data.
+     */
+    public function loginUsingCredentials($credentials)
+    {
+
+        if ($this->accessibleBy == 'properties') {
+            return new Credentials(
+                $credentials->hostname,
+                $credentials->username,
+                $credentials->password,
+                isset($credentials->realm) ? $credentials->realm : 'pam',  // Make it optional?
+                isset($credentials->port) ? $credentials->port : '8006'  // Make it optional?
+            );
+        }
+
+        if ($this->accessibleBy == 'methods') {
+            if (method_exists($credentials, 'getRealm')) {
+                $realm = $credentials->getRealm();
+            } else {
+                $realm = 'pam';
+            }
+
+            if (method_exists($credentials, 'getPort')) {
+                $port = $credentials->getPort();
+            } else {
+                $port = '8006';
+            }
+
+            return new Credentials(
+                $credentials->getHostname(),
+                $credentials->getUsername(),
+                $credentials->getPassword(),
+                $realm,  // Make it optional?
+                $port  // Make it optional?
+            );
+        }
+
+        /**
+         * Maybe we need to implement this type of accesor?
+         * $credentials->get('hostname');
+         */
+
+        // At this point this code can't be executed so ...
+        //$error = "This can't happen, run in circles or do something else.";
+        //throw new \RuntimeException($error);
+    }
 }
 
