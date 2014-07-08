@@ -172,7 +172,7 @@ class Proxmox extends ProxmoxVE
     /**
      * Assign the passed Credentials object to the ProxmoxVE.
      *
-     * @param ProxmoxVE\Credentials $credentials to assign.
+     * @param \ProxmoxVE\Credentials $credentials to assign.
      */
     public function setCredentials(Credentials $credentials)
     {
@@ -195,6 +195,8 @@ class Proxmox extends ProxmoxVE
      *                           more at http://pve.proxmox.com/pve2-api-doc/
      * @param array $params      An associative array filled with params.
      *
+     * @return array             A PHP array json_decode($response, true).
+     *
      * @throws \InvalidArgumentException
      */
     public function get($actionPath, $params = array())
@@ -205,8 +207,9 @@ class Proxmox extends ProxmoxVE
         }
 
         // Check if we have a prefixed '/' on the path, if not add one.
-        if (substr($actionPath, 0, 1) != '/')
+        if (substr($actionPath, 0, 1) != '/') {
             $actionPath = '/' . $actionPath;
+        }
 
         $url = $this->apiUrl . $actionPath;
 
@@ -233,8 +236,9 @@ class Proxmox extends ProxmoxVE
         }
 
         // Check if we have a prefixed '/' on the path, if not add one.
-        if (substr($actionPath, 0, 1) != '/')
+        if (substr($actionPath, 0, 1) != '/') {
             $actionPath = '/' . $actionPath;
+        }
 
         $url = $this->apiUrl . $actionPath;
 
@@ -290,8 +294,9 @@ class Proxmox extends ProxmoxVE
         }
 
         // Check if we have a prefixed '/' on the path, if not add one.
-        if (substr($actionPath, 0, 1) != '/')
+        if (substr($actionPath, 0, 1) != '/') {
             $actionPath = '/' . $actionPath;
+        }
 
         $url = $this->apiUrl . $actionPath;
 
@@ -442,5 +447,5 @@ class Proxmox extends ProxmoxVE
         //$error = "This can't happen, run in circles or do something else.";
         //throw new \RuntimeException($error);
     }
-}
 
+}
