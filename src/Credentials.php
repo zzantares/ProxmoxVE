@@ -152,7 +152,7 @@ class Credentials
      * Attempts to login using this credentials, if succeeded will return the
      * AuthToken used in all requests.
      *
-     * @return \ZzAntares\ProxmoxVE\AuthToken|bool If login fails will return
+     * @return \ProxmoxVE\AuthToken|bool If login fails will return
      *                                             false otherwise will return
      *                                             the AuthToken.
      */
@@ -171,7 +171,9 @@ class Credentials
 
         $login = json_decode($response, true);
 
-        if (!$login) return false; // Failed authentication
+        if (!$login) { // Failed authentication
+            return false;
+        }
 
         return new AuthToken(
             $login['data']['CSRFPreventionToken'],
