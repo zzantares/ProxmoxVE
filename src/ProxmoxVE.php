@@ -79,7 +79,9 @@ class ProxmoxVE
             default:
         }
 
-        if ($cookies) curl_setopt($curlSession, CURLOPT_COOKIE, $cookies);
+        if ($cookies) {
+            curl_setopt($curlSession, CURLOPT_COOKIE, $cookies);
+        }
 
         curl_setopt($curlSession, CURLOPT_URL, $url);
         curl_setopt($curlSession, CURLOPT_RETURNTRANSFER, true);
@@ -164,7 +166,9 @@ class ProxmoxVE
      */
     protected function get($url, $params = array())
     {
-        if ($params) $url .= '?' . http_build_query($params);
+        if ($params) {
+            $url .= '?' . http_build_query($params);
+        }
 
         $cookies = 'PVEAuthCookie=' . $this->authToken->getTicket();
 
@@ -237,6 +241,4 @@ class ProxmoxVE
 
         return json_decode($response, true);  // Some deletes return strings
     }
-
 }
-
