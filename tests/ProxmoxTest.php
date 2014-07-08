@@ -207,7 +207,7 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function testValidCredentialsObjectFunction()
+    public function testValidCredentialsObject()
     {
         $credentials = $this->getMockCredentials(array('host', 'user', 'pass'));
         $proxmox = new Proxmox($credentials);
@@ -218,6 +218,12 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($proxmox->validCredentialsObject('not an object'));
         $this->assertTrue($proxmox->validCredentialsObject($propertiesCredentials));
         $this->assertTrue($proxmox->validCredentialsObject($methodsCredentials));
+
+        $propertiesOptCredentials = new CustomCredentials\PropertiesOptCredentials('host', 'user', 'pass');
+        $methodsOptCredentials = new CustomCredentials\MethodsOptCredentials('host', 'user', 'pass');
+
+        $this->assertTrue($proxmox->validCredentialsObject($propertiesOptCredentials));
+        $this->assertTrue($proxmox->validCredentialsObject($methodsOptCredentials));
     }
 
 
