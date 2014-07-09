@@ -1,8 +1,10 @@
-v2.0.0
+v2.1.0
 ------
 
 - Now it is possible to specify the desired return type when creating Proxmox object, setters and getters for return type were added.
-- Added docs about getters & setters of the Proxmox client object.
+- Added docs about getters & setters and other tricks of the Proxmox client object.
+- Now you can create a Proxmox API client object with a custom credentials object.
+
 
 v2.0.0
 ------

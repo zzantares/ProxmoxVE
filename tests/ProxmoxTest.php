@@ -212,23 +212,23 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
         $credentials = $this->getMockCredentials(array('host', 'user', 'pass'));
         $proxmox = new Proxmox($credentials);
 
-        $propertiesCredentials = new CustomCredentials\PropertiesCredentials('host', 'user', 'pass', 'realm', 'port');
-        $methodsCredentials = new CustomCredentials\MethodsCredentials('host', 'user', 'pass', 'realm', 'port');
-
         $this->assertFalse($proxmox->validCredentialsObject('not an object'));
+
+        $propertiesCredentials = new CustomCredentials\PropertiesCredentials('host', 'user', 'pass', 'realm', 'port');
         $this->assertTrue($proxmox->validCredentialsObject($propertiesCredentials));
+
+        $methodsCredentials = new CustomCredentials\MethodsCredentials('host', 'user', 'pass', 'realm', 'port');
         $this->assertTrue($proxmox->validCredentialsObject($methodsCredentials));
 
         $propertiesOptCredentials = new CustomCredentials\PropertiesOptCredentials('host', 'user', 'pass');
-        $methodsOptCredentials = new CustomCredentials\MethodsOptCredentials('host', 'user', 'pass');
-
         $this->assertTrue($proxmox->validCredentialsObject($propertiesOptCredentials));
+
+        $methodsOptCredentials = new CustomCredentials\MethodsOptCredentials('host', 'user', 'pass');
         $this->assertTrue($proxmox->validCredentialsObject($methodsOptCredentials));
+
+        $badCredentials = new CustomCredentials\BadCredentials('bad', 'user', 'passwd');
+        $this->assertFalse($proxmox->validCredentialsObject($badCredentials));
     }
 
-
-    /**
-     * Probar que se pueda usar CustomCredentials con campos realm y port optativos
-     */
 }
 

@@ -182,6 +182,51 @@ echo 'Hostname: ' . $credentialsB->getHostname();  // Hostname: hostB
 ```
 
 
+Using custom credentials object
+-------------------------------
+
+You can pass your own custom credentials object when creating the API client object, for now this library internally will create a valid credentials object. The only thing you custom credentials object needs, is to have the required accesible properties:
+
+- `hostname`
+- `username`
+- `password`
+- `realm` (optional defaults to `pam`)
+- `port` (optional defaults to `8006`)
+
+If you feel using getters is better, the Proxmox API client object will search for the next getters if properties are not accesible:
+
+- `getHostname()`
+- `getUsername()`
+- `getPassword()`
+- `getRealm()` (optional defaults to `pam`)
+- `getPort()` (optional defaults to `8006`)
+
+```php
+<?
+require_once 'vendor/autoload.php';
+
+// Example of custom credentials class
+class CustomCredentials
+{
+    public function __construct($host, $user, $pass)
+    {
+        $this->hostname = $host;
+        $this->username = $user;
+        $this->password = $pass;
+    }
+}
+
+// Create an object of your custom credentials object
+$customCredentials = new CustomCredentials('my.proxmox.tld', 'user', 'secret');
+
+// Pass your custom credentials when creating the API client
+$proxmox = new ProxmoxVE\Proxmox($customCredentials);
+
+// At this point you can use the $proxmox normally
+```
+
+> **Why is this useful?** Personally when dealing with Eloquent models I already have a Credentials object, so I want to use that object to login to a proxmox server.
+
 Set and get response type
 -------------------------
 

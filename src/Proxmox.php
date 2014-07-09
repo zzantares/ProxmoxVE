@@ -172,10 +172,20 @@ class Proxmox extends ProxmoxVE
     /**
      * Assign the passed Credentials object to the ProxmoxVE.
      *
-     * @param \ProxmoxVE\Credentials $credentials to assign.
+     * @param object $credentials A custom object holding credentials or a
+     *                            Credentials object to assign.
      */
-    public function setCredentials(Credentials $credentials)
+    public function setCredentials($credentials)
     {
+        if (!$credentials instanceof Credentials) {
+            if (!$this->validCredentialsObject($credentials)) {
+                $errorMessage = 'setCredentials needs a valid object.';
+                throw new \InvalidArgumentException($errorMessage);
+            }
+
+            $credentials = $this->loginUsingCredentials($credentials);
+        }
+
         $this->credentials = $credentials;
         $token = $credentials->login();
 
@@ -403,7 +413,7 @@ class Proxmox extends ProxmoxVE
      *
      * @param object $credentials A custom object holding proxmox login data.
      */
-    public function loginUsingCredentials($credentials)
+    protected function loginUsingCredentials($credentials)
     {
 
         if ($this->accessibleBy == 'properties') {
@@ -411,8 +421,8 @@ class Proxmox extends ProxmoxVE
                 $credentials->hostname,
                 $credentials->username,
                 $credentials->password,
-                isset($credentials->realm) ? $credentials->realm : 'pam',  // Make it optional?
-                isset($credentials->port) ? $credentials->port : '8006'  // Make it optional?
+                isset($credentials->realm) ? $credentials->realm : 'pam',
+                isset($credentials->port) ? $credentials->port : '8006'
             );
         }
 
