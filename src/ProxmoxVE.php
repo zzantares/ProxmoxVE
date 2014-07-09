@@ -172,9 +172,7 @@ class ProxmoxVE
 
         $cookies = 'PVEAuthCookie=' . $this->authToken->getTicket();
 
-        $response = self::request($url, 'GET', null, null, $cookies);
-
-        return json_decode($response, true);
+        return self::request($url, 'GET', null, null, $cookies);
     }
 
 
@@ -195,9 +193,7 @@ class ProxmoxVE
         $cookies = 'PVEAuthCookie=' . $this->authToken->getTicket();
         $headers = array('CSRFPreventionToken: ' . $this->authToken->getCsrf());
 
-        $response = self::request($url, 'POST', $params, $headers, $cookies);
-
-        return json_decode($response, true);
+        return self::request($url, 'POST', $params, $headers, $cookies);
     }
 
 
@@ -216,9 +212,7 @@ class ProxmoxVE
         $cookies = 'PVEAuthCookie=' . $this->authToken->getTicket();
         $headers = array('CSRFPreventionToken: ' . $this->authToken->getCsrf());
 
-        $response = self::request($url, 'PUT', $params, $headers, $cookies);
-
-        return json_decode($response, true);
+        return self::request($url, 'PUT', $params, $headers, $cookies);
     }
 
 
@@ -237,8 +231,6 @@ class ProxmoxVE
         $cookies = 'PVEAuthCookie=' . $this->authToken->getTicket();
         $headers = array('CSRFPreventionToken: ' . $this->authToken->getCsrf());
 
-        $response = self::request($url, 'DELETE', $params, $headers, $cookies);
-
-        return json_decode($response, true);  // Some deletes return strings
+        return self::request($url, 'DELETE', $params, $headers, $cookies);
     }
 }
