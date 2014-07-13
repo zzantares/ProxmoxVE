@@ -401,6 +401,16 @@ class Proxmox extends ProxmoxVE
             return true;
         }
 
+        // Find properties that are using magic function
+        $hasHostname = isset($credentials->hostname);
+        $hasUsername = isset($credentials->username);
+        $hasPassword = isset($credentials->password);
+
+        if ($hasHostname and $hasUsername and $hasPassword) {
+            $this->accessibleBy = '__get';
+            return true;
+        }
+
         $this->accessibleBy = false;
         return false;
     }
@@ -426,6 +436,17 @@ class Proxmox extends ProxmoxVE
             );
         }
 
+        // In eloquent models properties not set are emppty thus null
+        if ($this->accessibleBy == '__get') {
+            return new Credentials(
+                $credentials->hostname,
+                $credentials->username,
+                $credentials->password,
+                empty($credentials->realm) ? 'pam' : $credentials->realm,
+                empty($credentials->port) ? '8006' : $credentials->port
+            );
+        }
+
         if ($this->accessibleBy == 'methods') {
             if (method_exists($credentials, 'getRealm')) {
                 $realm = $credentials->getRealm();
@@ -443,8 +464,8 @@ class Proxmox extends ProxmoxVE
                 $credentials->getHostname(),
                 $credentials->getUsername(),
                 $credentials->getPassword(),
-                $realm,  // Make it optional?
-                $port  // Make it optional?
+                $realm,
+                $port
             );
         }
 

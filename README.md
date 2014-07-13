@@ -6,6 +6,8 @@ This **PHP 5.3+** library allows you to interact with your Proxmox server via AP
 [![Build Status](https://travis-ci.org/ZzAntares/ProxmoxVE.svg?branch=master)](https://travis-ci.org/ZzAntares/ProxmoxVE)
 [![Latest Stable Version](https://poser.pugx.org/zzantares/proxmoxve/v/stable.svg)](https://packagist.org/packages/zzantares/proxmoxve)
 [![Total Downloads](https://poser.pugx.org/zzantares/proxmoxve/downloads.svg)](https://packagist.org/packages/zzantares/proxmoxve)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/ZzAntares/ProxmoxVE/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/ZzAntares/ProxmoxVE/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/ZzAntares/ProxmoxVE/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/ZzAntares/ProxmoxVE/?branch=master)
 [![Latest Unstable Version](https://poser.pugx.org/zzantares/proxmoxve/v/unstable.svg)](https://packagist.org/packages/zzantares/proxmoxve)
 [![License](https://poser.pugx.org/zzantares/proxmoxve/license.svg)](https://packagist.org/packages/zzantares/proxmoxve)
 
