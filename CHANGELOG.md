@@ -1,3 +1,10 @@
+v2.1.1
+------
+
+- Small bug fixed, using an Eloquent model as a custom credentials object was not valid.
+- Code coverage and code quality service integrated.
+
+
 v2.1.0
 ------
 

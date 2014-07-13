@@ -436,7 +436,7 @@ class Proxmox extends ProxmoxVE
             );
         }
 
-        // In eloquent models properties not set are emppty thus null
+        // In eloquent models properties not set are emppty thus not null
         if ($this->accessibleBy == '__get') {
             return new Credentials(
                 $credentials->hostname,
