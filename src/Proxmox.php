@@ -478,5 +478,4 @@ class Proxmox extends ProxmoxVE
         //$error = "This can't happen, run in circles or do something else.";
         //throw new \RuntimeException($error);
     }
-
 }
