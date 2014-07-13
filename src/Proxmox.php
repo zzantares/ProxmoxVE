@@ -443,8 +443,8 @@ class Proxmox extends ProxmoxVE
                 $credentials->getHostname(),
                 $credentials->getUsername(),
                 $credentials->getPassword(),
-                $realm,  // Make it optional?
-                $port  // Make it optional?
+                $realm, // Make it optional?
+                $port // Make it optional?
             );
         }
 
@@ -457,5 +457,4 @@ class Proxmox extends ProxmoxVE
         //$error = "This can't happen, run in circles or do something else.";
         //throw new \RuntimeException($error);
     }
-
 }
