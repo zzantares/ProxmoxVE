@@ -481,6 +481,44 @@ class Proxmox extends ProxmoxVE
     }
 
 
+    public function getPools()
+    {
+        return $this->get('/pools');
+    }
+
+
+    public function getPool($poolId)
+    {
+        return $this->get('/pools/' . $poolId);
+    }
+
+
+    public function createPool($poolData)
+    {
+        if (!is_array($poolData)) {
+            throw new \InvalidArgumentException('Pool data needs to be array');
+        }
+
+        return $this->create('/pools', $poolData);
+    }
+
+
+    public function setPool($poolId, $poolData = array())
+    {
+        if (!is_array($poolData)) {
+            throw new \InvalidArgumentException('Pool data needs to be array');
+        }
+
+        return $this->set('/pools/' . $poolId, $poolData);
+    }
+
+
+    public function deletePool($poolId)
+    {
+        return $this->delete('/pools/' . $poolId);
+    }
+
+
     public function getStorages($type = null)
     {
         if (!$type) {

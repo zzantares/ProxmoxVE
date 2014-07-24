@@ -233,6 +233,52 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
     }
 
 
+    public function testGetPools()
+    {
+        $fakeResponse = <<<'EOD'
+{"data":[{"comment":"Simple pool","poolid":"Marketing"},{"comment":"Pool for sales people","poolid":"Sales"}]}
+EOD;
+
+        $fakePools = json_decode($fakeResponse, true);
+        $proxmox = $this->getMockProxmox('get', $fakePools);
+        $this->assertEquals($proxmox->getPools(), $fakePools);
+    }
+
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testCreateNewPoolThrowsExceptionIfArrayIsNotPassed()
+    {
+        $credentials = $this->getMockCredentials(array('host', 'user', 'pass'));
+        $proxmox = new Proxmox($credentials);
+        $proxmox->createPool('not an array');
+    }
+
+
+    public function testGetPool()
+    {
+        $fakeResponse = <<<'EOD'
+{"data":{"members":[],"comment":"Pool for sales people"}}
+EOD;
+
+        $fakePool = json_decode($fakeResponse, true);
+        $proxmox = $this->getMockProxmox('get', $fakePool);
+        $this->assertEquals($proxmox->getPool('Sales'), $fakePool);
+    }
+
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testSetPoolDataThrowsExceptionIfArrayIsNotPassed()
+    {
+        $credentials = $this->getMockCredentials(array('host', 'user', 'pass'));
+        $proxmox = new Proxmox($credentials);
+        $proxmox->setPool('this is', 'not an array');
+    }
+
+
     public function testGetStorages()
     {
         $fakeResponse = <<<'EOD'
@@ -252,7 +298,6 @@ EOD;
     {
         $credentials = $this->getMockCredentials(array('host', 'user', 'pass'));
         $proxmox = new Proxmox($credentials);
-
         $proxmox->createStorage('not an array');
     }
 
@@ -276,7 +321,6 @@ EOD;
     {
         $credentials = $this->getMockCredentials(array('host', 'user', 'pass'));
         $proxmox = new Proxmox($credentials);
-
         $proxmox->setStorage('this is', 'not an array');
     }
 }
