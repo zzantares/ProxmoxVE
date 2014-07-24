@@ -455,8 +455,8 @@ class Proxmox extends ProxmoxVE
             }
 
             if (method_exists($credentials, 'getPort')) {
-                $port = $credentials->getPort();
             } else {
+                $port = $credentials->getPort();
                 $port = '8006';
             }
 
@@ -481,42 +481,77 @@ class Proxmox extends ProxmoxVE
     }
 
 
+    /**
+     * Retrieves the '/access' resource of the Proxmox API resources tree.
+     *
+     * @return mixed The processed response, can be an array, string or object.
+     */
     public function getAccess()
     {
         return $this->get('/access');
     }
 
 
+    /**
+     * Retrieves the '/cluster' resource of the Proxmox API resources tree.
+     *
+     * @return mixed The processed response, can be an array, string or object.
+     */
     public function getCluster()
     {
         return $this->get('/cluster');
     }
 
 
+    /**
+     * Retrieves the '/nodes' resource of the Proxmox API resources tree.
+     *
+     * @return mixed The processed response, can be an array, string or object.
+     */
     public function getNodes()
     {
         return $this->get('/nodes');
     }
 
 
+    /**
+     * Retrieves a specific node defined in the resources tree as '/nodes/node'.
+     *
+     * @return mixed The processed response, can be an array, string or object.
+     */
     public function getNode($nodeName)
     {
         return $this->get('/nodes/' . $nodeName);
     }
 
 
+    /**
+     * Retrieves the '/pools' resource of the Proxmox API resources tree.
+     *
+     * @return mixed The processed response, can be an array, string or object.
+     */
     public function getPools()
     {
         return $this->get('/pools');
     }
 
 
+    /**
+     * Retrieves a specific pool defined in the resources tree as '/pools/pool'.
+     *
+     * @return mixed The processed response, can be an array, string or object.
+     */
     public function getPool($poolId)
     {
         return $this->get('/pools/' . $poolId);
     }
 
 
+    /**
+     * Creates a pool resource inside the '/pools' resources tree.
+     *
+     * @return mixed The processed response, can be an array, string or object.
+     */
     public function createPool($poolData)
     {
         if (!is_array($poolData)) {
@@ -527,6 +562,11 @@ class Proxmox extends ProxmoxVE
     }
 
 
+    /**
+     * Sets the passed data in the specified pool (updates the pool info).
+     *
+     * @return mixed The processed response, can be an array, string or object.
+     */
     public function setPool($poolId, $poolData = array())
     {
         if (!is_array($poolData)) {
@@ -537,12 +577,23 @@ class Proxmox extends ProxmoxVE
     }
 
 
+    /**
+     * Deletes the specified pool from the '/pools' resources tree.
+     *
+     * @return mixed The processed response, can be an array, string or object.
+     */
     public function deletePool($poolId)
     {
         return $this->delete('/pools/' . $poolId);
     }
 
 
+    /**
+     * Retrieves all the storages found in the Proxmox server, or only the ones
+     * matching the storage type provided if any.
+     *
+     * @return mixed The processed response, can be an array, string or object.
+     */
     public function getStorages($type = null)
     {
         if (!$type) {
@@ -571,6 +622,11 @@ class Proxmox extends ProxmoxVE
     }
 
 
+    /**
+     * Creates a storage resource using the passed data.
+     *
+     * @return mixed The processed response, can be an array, string or object.
+     */
     public function createStorage($storageData)
     {
         if (!is_array($storageData)) {
@@ -584,12 +640,23 @@ class Proxmox extends ProxmoxVE
     }
 
 
+    /**
+     * Retrieves a specified storage matching the passed storage identifier.
+     *
+     * @return mixed The processed response, can be an array, string or object.
+     */
     public function getStorage($storageId)
     {
         return $this->get('/storage/' . $storageId);
     }
 
 
+    /**
+     * Sets the passed data into the specified storage (updates the storage
+     * info).
+     *
+     * @return mixed The processed response, can be an array, string or object.
+     */
     public function setStorage($storageId, $storageData = array())
     {
         if (!is_array($storageData)) {
@@ -601,6 +668,12 @@ class Proxmox extends ProxmoxVE
     }
 
 
+    /**
+     * Deletes the storage from the '/storage' resources tree that matches the
+     * passed storage identifier.
+     *
+     * @return mixed The processed response, can be an array, string or object.
+     */
     public function deleteStorage($storageId)
     {
         return $this->delete('/storage/' . $storageId);
