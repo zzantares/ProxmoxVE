@@ -35,17 +35,19 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function getMockProxmox($constructArgs = array())
+    public function getMockProxmox($method, $returns = null)
     {
         $credentials = $this->getMockCredentials(array('host', 'user', 'pass'));
         $proxmox = $this->getMockBuilder('ProxmoxVE\Proxmox')
-                        ->setMethods(array('processResponse'))
+                        //->setMethods(array('processResponse'))
+                        ->setMethods(array($method))
                         ->setConstructorArgs(array($credentials))
                         ->getMock();
 
         $proxmox->expects($this->any())
-                ->method('processResponse')
-                ->will($this->returnValue(null));
+                //->method('processResponse')
+                ->method($method)
+                ->will($this->returnValue($returns));
 
         return $proxmox;
     }
@@ -149,7 +151,7 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
      */
     public function testGettingResourcesThrowsExceptionWhenWrongParamsGiven()
     {
-        $proxmox = $this->getMockProxmox(array('host', 'user', 'passwd'));
+        $proxmox = $this->getMockProxmox('processResponse');
         $proxmox->get('/nodes', 'bad param');
     }
 
@@ -159,7 +161,7 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
      */
     public function testSettingResourcesThrowsExceptionWhenWrongParamsGiven()
     {
-        $proxmox = $this->getMockProxmox(array('host', 'user', 'passwd'));
+        $proxmox = $this->getMockProxmox('processResponse');
         $proxmox->set('/access/users/bob@pve', 'bad param');
     }
 
@@ -169,7 +171,7 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
      */
     public function testCreattingResourcesThrowsExceptionWhenWrongParamsGiven()
     {
-        $proxmox = $this->getMockProxmox(array('host', 'user', 'passwd'));
+        $proxmox = $this->getMockProxmox('processResponse');
         $proxmox->create('/access/users', 'bad param');
     }
 
@@ -179,7 +181,7 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
      */
     public function testDelettingResourcesThrowsExceptionWhenWrongParamsGiven()
     {
-        $proxmox = $this->getMockProxmox(array('host', 'user', 'passwd'));
+        $proxmox = $this->getMockProxmox('processResponse');
         $proxmox->delete('/access/users/user@realm', 'bad param');
     }
 
@@ -230,5 +232,52 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($proxmox->validCredentialsObject($badCredentials));
     }
 
+
+    public function testGetStorages()
+    {
+        $fakeResponse = <<<'EOD'
+{"data":[{"priority":0,"content":"images,iso,vztmpl,rootdir","digest":"da39a3ee5e6b4b0d3255bfef95601890afd80709","maxfiles":0,"path":"/var/lib/vz","type":"dir","storage":"local"}]}
+EOD;
+
+        $fakeStorages = json_decode($fakeResponse, true);
+        $proxmox = $this->getMockProxmox('get', $fakeStorages);
+        $this->assertEquals($proxmox->getStorages(), $fakeStorages);
+    }
+
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testCreateNewStorageThrowsExceptionIfArrayIsNotPassed()
+    {
+        $credentials = $this->getMockCredentials(array('host', 'user', 'pass'));
+        $proxmox = new Proxmox($credentials);
+
+        $proxmox->createStorage('not an array');
+    }
+
+
+    public function testGetStorage()
+    {
+        $fakeResponse = <<<'EOD'
+{"data":{"priority":0,"content":"images,iso,vztmpl,rootdir","digest":"da39a3ee5e6b4b0d3255bfef95601890afd80709","maxfiles":0,"path":"/var/lib/vz","type":"dir","storage":"local"}}
+EOD;
+
+        $fakeStorage = json_decode($fakeResponse, true);
+        $proxmox = $this->getMockProxmox('get', $fakeStorage);
+        $this->assertEquals($proxmox->getStorage('local'), $fakeStorage);
+    }
+
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testSetStorageDataThrowsExceptionIfArrayIsNotPassed()
+    {
+        $credentials = $this->getMockCredentials(array('host', 'user', 'pass'));
+        $proxmox = new Proxmox($credentials);
+
+        $proxmox->setStorage('this is', 'not an array');
+    }
 }
 

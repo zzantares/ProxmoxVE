@@ -195,11 +195,6 @@ TODO
 - Notify the user when a CNAME DNS record is provided as a hostname, Proxmox API seems to not work in this case.
 - Add SSL support.
 - Save AuthToken data in serialized form to avoid ticket creation per request.
-- Usage of the API need to allows you to specify return format.
-	- json
-	- extjs
-	- html
-	- text
 - Use an abstracted OOP layer to access all Proxmox resources.
 - Code useful tests ¬_¬!
 

@@ -476,6 +476,72 @@ class Proxmox extends ProxmoxVE
 
         // At this point this code can't be executed so ...
         //$error = "This can't happen, run in circles or do something else.";
+
         //throw new \RuntimeException($error);
     }
+
+
+    public function getStorages($type = null)
+    {
+        if (!$type) {
+            return $this->get('/storage');
+        }
+
+        $supportedTypes = array(
+            'lvm',
+            'nfs',
+            'dir',
+            'zfs',
+            'rbd',
+            'iscsi',
+            'sheepdog',
+            'glusterfs',
+            'iscsidirect',
+        );
+
+        if (in_array($type, $supportedTypes)) {
+            return $this->get('/storage', array(
+                'type' => $type,
+            ));
+        }
+
+        /* If type not found returns null */
+    }
+
+
+    public function createStorage($storageData)
+    {
+        if (!is_array($storageData)) {
+            $errorMessage = 'Storage data needs to be array';
+            throw new \InvalidArgumentException($errorMessage);
+        }
+
+        /* Should we check the required keys (storage, type) in the array? */
+
+        return $this->create('/storage', $storageData);
+    }
+
+
+    public function getStorage($storageId)
+    {
+        return $this->get('/storage/' . $storageId);
+    }
+
+
+    public function setStorage($storageId, $storageData = array())
+    {
+        if (!is_array($storageData)) {
+            $errorMessage = 'Storage data needs to be array';
+            throw new \InvalidArgumentException($errorMessage);
+        }
+
+        return $this->set('/storage/' . $storageId, $storageData);
+    }
+
+
+    public function deleteStorage($storageId)
+    {
+        return $this->delete('/storage/' . $storageId);
+    }
+
 }
