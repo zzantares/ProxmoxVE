@@ -481,6 +481,18 @@ class Proxmox extends ProxmoxVE
     }
 
 
+    public function getNodes()
+    {
+        return $this->get('/nodes');
+    }
+
+
+    public function getNode($nodeName)
+    {
+        return $this->get('/nodes/' . $nodeName);
+    }
+
+
     public function getPools()
     {
         return $this->get('/pools');

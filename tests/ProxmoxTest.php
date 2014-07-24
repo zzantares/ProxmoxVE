@@ -233,6 +233,30 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
     }
 
 
+    public function testGetNodes()
+    {
+        $fakeResponse = <<<'EOD'
+{"data":[{"disk":944705536,"cpu":0.00299545408156743,"maxdisk":5284429824,"maxmem":1038385152,"node":"masterpve","maxcpu":1,"level":"","uptime":1834785,"id":"node/masterpve","type":"node","mem":310874112},{"disk":944705536,"cpu":0.00299545408156743,"maxdisk":5284429824,"maxmem":1038385152,"node":"slavepve","maxcpu":1,"level":"","uptime":1834785,"id":"node/slavepve","type":"node","mem":310874112}]}
+EOD;
+
+        $fakeNodes = json_decode($fakeResponse, true);
+        $proxmox = $this->getMockProxmox('get', $fakeNodes);
+        $this->assertEquals($proxmox->getNodes(), $fakeNodes);
+    }
+
+
+    public function testGetNode()
+    {
+        $fakeResponse = <<<'EOD'
+{"data":[{"name":"ceph"},{"name":"apt"},{"name":"version"},{"name":"syslog"},{"name":"bootlog"},{"name":"status"},{"name":"subscription"},{"name":"tasks"},{"name":"rrd"},{"name":"rrddata"},{"name":"vncshell"},{"name":"spiceshell"},{"name":"time"},{"name":"dns"},{"name":"services"},{"name":"scan"},{"name":"storage"},{"name":"qemu"},{"name":"openvz"},{"name":"vzdump"},{"name":"ubcfailcnt"},{"name":"network"},{"name":"aplinfo"},{"name":"startall"},{"name":"stopall"},{"name":"netstat"}]}
+EOD;
+
+        $fakeNode = json_decode($fakeResponse, true);
+        $proxmox = $this->getMockProxmox('get', $fakeNode);
+        $this->assertEquals($proxmox->getNode('centos'), $fakeNode);
+    }
+
+
     public function testGetPools()
     {
         $fakeResponse = <<<'EOD'
