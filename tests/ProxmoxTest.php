@@ -233,6 +233,30 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
     }
 
 
+    public function testGetAccess()
+    {
+        $fakeResponse = <<<'EOD'
+{"data":[{"subdir":"users"},{"subdir":"groups"},{"subdir":"roles"},{"subdir":"acl"},{"subdir":"domains"},{"subdir":"ticket"},{"subdir":"password"}]}
+EOD;
+
+        $fakeAccess = json_decode($fakeResponse, true);
+        $proxmox = $this->getMockProxmox('get', $fakeAccess);
+        $this->assertEquals($proxmox->getAccess(), $fakeAccess);
+    }
+
+
+    public function testGetCluster()
+    {
+        $fakeResponse = <<<'EOD'
+{"data":[{"name":"log"},{"name":"options"},{"name":"resources"},{"name":"tasks"},{"name":"backup"},{"name":"ha"},{"name":"status"},{"name":"nextid"}]}
+EOD;
+
+        $fakeCluster = json_decode($fakeResponse, true);
+        $proxmox = $this->getMockProxmox('get', $fakeCluster);
+        $this->assertEquals($proxmox->getCluster(), $fakeCluster);
+    }
+
+
     public function testGetNodes()
     {
         $fakeResponse = <<<'EOD'

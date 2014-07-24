@@ -481,6 +481,18 @@ class Proxmox extends ProxmoxVE
     }
 
 
+    public function getAccess()
+    {
+        return $this->get('/access');
+    }
+
+
+    public function getCluster()
+    {
+        return $this->get('/cluster');
+    }
+
+
     public function getNodes()
     {
         return $this->get('/nodes');
