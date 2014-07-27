@@ -1,13 +1,12 @@
 <?php
 
-namespace ProxmoxVE\CustomCredentials;
+namespace ProxmoxVE\CustomClasses;
 
-class BadCredentials
+class ProtectedCredentials
 {
-    private $hostname;
-    private $username;
-    private $password;
-
+    protected $hostname;
+    protected $username;
+    protected $password;
 
     public function __construct($host, $user, $pass)
     {

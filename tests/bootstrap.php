@@ -8,4 +8,4 @@ if (!file_exists($autoload)) {
 }
 
 $loader = include $autoload;
-$loader->addPsr4('ProxmoxVE\\CustomCredentials\\', __DIR__ . '/CustomCredentials');
+$loader->addPsr4('ProxmoxVE\\CustomClasses\\', __DIR__ . '/CustomClasses');

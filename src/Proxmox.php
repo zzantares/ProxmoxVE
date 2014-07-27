@@ -9,6 +9,9 @@
 
 namespace ProxmoxVE;
 
+use ProxmoxVE\Exception\MalformedCredentialsException;
+use ProxmoxVE\Exception\AuthenticationException;
+
 /**
  * ProxmoxVE class. In order to interact with the proxmox server, the desired
  * app's code needs to create and use an object of this class.
@@ -52,13 +55,102 @@ class Proxmox extends ProxmoxVE
     private $fakeType;
 
 
-    /**
-     * Tells if the custom credentials object is accesible by using 'properties'
-     * of by getter 'methods'.
-     *
-     * @var string
-     */
-    private $accessibleBy;
+    public function parseCustomCredentials($credentials)
+    {
+        if (!is_object($credentials)) {
+            return null;
+        }
+
+        // Trying to find variables
+        $objectProperties = array_keys(get_object_vars($credentials));
+        $requiredProperties = ['hostname', 'username', 'password'];
+
+        // Needed properties exists in the object?
+        $found = count(array_intersect($requiredProperties, $objectProperties));
+        if ($found == count($requiredProperties)) {
+            $realm = $credentials->realm;
+            $port = $credentials->port;
+
+            return [
+                'hostname' => $credentials->hostname,
+                'username' => $credentials->username,
+                'password' => $credentials->password,
+                'realm' => isset($realm) ? $realm : 'pam',
+                'port' => isset($port) ? $port : '8006',
+            ];
+        }
+
+
+        // Trying to find getters
+        $objectMethods = get_class_methods($credentials);
+        $requiredMethods = ['getHostname', 'getUsername', 'getPassword'];
+
+        // Needed functions exists in the object?
+        $found = count(array_intersect($requiredMethods, $objectMethods));
+        if ($found == count($requiredMethods)) {
+            $realm = method_exists($credentials, 'getRealm')
+                ? $credentials->getRealm()
+                : 'pam';
+
+            $port = method_exists($credentials, 'getPort')
+                ? $credentials->getPort()
+                : '8006';
+
+            return [
+                'hostname' => $credentials->getHostname(),
+                'username' => $credentials->getUsername(),
+                'password' => $credentials->getPassword(),
+                'realm' => $realm,
+                'port' => $port,
+            ];
+        }
+
+        // Get properties of object using magic method __get
+        if (in_array('__get', $objectMethods)) {
+            $hasHostname = $credentials->hostname;
+            $hasUsername = $credentials->username;
+            $hasPassword = $credentials->password;
+
+            if ($hasHostname and $hasUsername and $hasPassword) {
+                return [
+                    'hostname' => $credentials->hostname,
+                    'username' => $credentials->username,
+                    'password' => $credentials->password,
+                    'realm' => $credentials->realm ?: 'pam',
+                    'port' => $credentials->port ?: '8006',
+                ];
+            }
+        }
+    }
+
+
+    private function login()
+    {
+        $client = new \GuzzleHttp\Client();
+        $url = "https://{$this->credentials['hostname']}:{$this->credentials['port']}/api2/json";
+        $response = $client->post($url . '/access/ticket', [
+            'verify' => false,
+            'exceptions' => false,
+            'body' => [
+                'username' => $this->credentials['username'],
+                'password' => $this->credentials['password'],
+                'realm' => $this->credentials['realm'],
+            ],
+        ]);
+
+        $response = $response->json();
+
+        if (!$response['data']) {
+            $error = 'Login "' . $this->credentials['username'] . '" failed!';
+            throw new AuthenticationException($error);
+        }
+
+        return new AuthToken(
+            $response['data']['CSRFPreventionToken'],
+            $response['data']['ticket'],
+            $response['data']['username']
+        );
+    }
 
 
     /**
@@ -71,46 +163,61 @@ class Proxmox extends ProxmoxVE
      */
     public function __construct($credentials, $responseType = 'array')
     {
-        if ($credentials instanceof Credentials) {
-            $this->credentials = $credentials;
+        $this->setCredentials($credentials);
+        $this->token = $this->login();
+    }
 
-        } elseif (is_array($credentials)) {
-            $keys = array('hostname', 'username', 'password', 'realm', 'port');
 
-            // Check if array has all needed data.
-            if (count(array_diff($keys, array_keys($credentials))) != 0) {
-                $errorMessage = 'PVE credentials needs ' . implode(', ', $keys);
-                throw new \InvalidArgumentException($errorMessage);
+    /**
+     * Returns the Credentials object associated with this proxmox API instance.
+     * 
+     * @return \ProxmoxVE\Credentials Object containing all proxmox data used to
+     *                                connect to the server.
+     */
+    public function getCredentials()
+    {
+        return $this->credentials;
+    }
+
+
+    /**
+     * Assign the passed Credentials object to the ProxmoxVE.
+     *
+     * @param object $credentials A custom object holding credentials or a
+     *                            Credentials object to assign.
+     */
+    public function setCredentials($credentials)
+    {
+        if (!is_array($credentials)) {
+            $credentials = $this->parseCustomCredentials($credentials);
+
+            if (!$credentials) {
+                $errorMessage = 'PVE API needs a credentials object or array.';
+                throw new MalformedCredentialsException($errorMessage);
             }
-
-            $this->credentials = new Credentials(
-                $credentials['hostname'],
-                $credentials['username'],
-                $credentials['password'],
-                $credentials['realm'],
-                $credentials['port']
-            );
 
         } else {
-            if (!$this->validCredentialsObject($credentials)) {
-                $errorMessage = 'PVE API needs a Credentials object or array.';
-                throw new \InvalidArgumentException($errorMessage);
+            $requiredKeys = ['hostname', 'username', 'password'];
+            $credentialsKeys = array_keys($credentials);
+
+            $found = count(array_intersect($requiredKeys, $credentialsKeys));
+
+            if ($found != count($requiredKeys)) {
+                $error = 'PVE credentials needs ' . implode(', ', $requiredKeys);
+                throw new MalformedCredentialsException($error);
             }
 
-            $this->credentials = $this->loginUsingCredentials($credentials);
+            // Set default realm and port if are not in the array.
+            if (!isset($credentials['realm'])) {
+                $credentials['realm'] = 'pam';
+            }
+
+            if (!isset($credentials['port'])) {
+                $credentials['port'] = '8006';
+            }
         }
 
-        $this->setResponseType($responseType);
-        $this->apiUrl = $this->getApiUrl();
-
-        $authToken = $this->credentials->login();
-
-        if (!$authToken) {
-            $error = 'Can\'t login to Proxmox Server! Check your credentials.';
-            throw new \RuntimeException($error);
-        }
-
-        parent::__construct($authToken);
+        $this->credentials = $credentials;
     }
 
 
@@ -157,45 +264,6 @@ class Proxmox extends ProxmoxVE
     }
 
 
-    /**
-     * Returns the Credentials object associated with this proxmox API instance.
-     * 
-     * @return \ProxmoxVE\Credentials Object containing all proxmox data used to
-     *                                connect to the server.
-     */
-    public function getCredentials()
-    {
-        return $this->credentials;
-    }
-
-
-    /**
-     * Assign the passed Credentials object to the ProxmoxVE.
-     *
-     * @param object $credentials A custom object holding credentials or a
-     *                            Credentials object to assign.
-     */
-    public function setCredentials($credentials)
-    {
-        if (!$credentials instanceof Credentials) {
-            if (!$this->validCredentialsObject($credentials)) {
-                $errorMessage = 'setCredentials needs a valid object.';
-                throw new \InvalidArgumentException($errorMessage);
-            }
-
-            $credentials = $this->loginUsingCredentials($credentials);
-        }
-
-        $this->credentials = $credentials;
-        $token = $credentials->login();
-
-        if (!$token) {
-            $error = 'Can\'t login to Proxmox Server! Check your credentials.';
-            throw new \RuntimeException($error);
-        }
-
-        $this->setAuthToken($token);  // Should we use parent:: ?
-    }
 
 
     /**
@@ -400,8 +468,8 @@ class Proxmox extends ProxmoxVE
             $this->accessibleBy = 'methods';
             return true;
         }
-
         // Find properties that are using magic function
+
         $hasHostname = isset($credentials->hostname);
         $hasUsername = isset($credentials->username);
         $hasPassword = isset($credentials->password);
@@ -680,3 +748,4 @@ class Proxmox extends ProxmoxVE
     }
 
 }
+
