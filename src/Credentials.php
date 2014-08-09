@@ -9,131 +9,55 @@
 
 namespace ProxmoxVE;
 
+use ProxmoxVE\Exception\MalformedCredentialsException;
+
 /**
- * Credentials class. It will handle all related data used to connect to a
- * promxox server.
+ * Credentials class. Handles all related data used to connect to a Proxmox
+ * server.
  *
  * @author César Muñoz <zzantares@gmail.com>
  */
-class Credentials
+class Credentials extends ProxmoxVE
 {
     /**
-     * Proxmox hostname or IP (e.g. 'proxmox.mydomain.com').
+     * Construct.
      *
-     * @var string
+     * @param array|object $credentials This needs to have 'hostname',
+     *                                  'username' and 'password' defined.
      */
-    private $hostname;
+    public function __construct($credentials)
+    {
+        // Get credentials object in array form
+        $credentials = $this->parseCustomCredentials($credentials);
 
+        if (!$credentials) {
+            $error = 'PVE API needs a credentials object or an array.';
+            throw new MalformedCredentialsException($error);
+        }
 
-    /**
-     * Username used to connect to the Proxmox server.
-     *
-     * @var string
-     */
-    private $username;
-
-
-    /**
-     * Password used to connect to the Proxmox server.
-     */
-    private $password;
-
-
-    /**
-     * Realm used to login to the Proxmox server (e.g. 'pam' or 'pve').
-     *
-     * @var string
-     */
-    private $realm;
-
-
-    /**
-     * Port where Proxmox UI is listening on (e.g. '8006').
-     *
-     * @var string
-     */
-    private $port;
-
-
-    /**
-     * Constructor.
-     *
-     * @param string $hostname The proxmox hostname or IP without the "https://"
-     *                         stuff.
-     * @param string $username The username used to connect to the proxmox UI.
-     * @param string $password The password used to connect to the proxmox UI.
-     * @param string $realm    The realm in wich the username and password are
-     *                         valid. If no value is passed 'pam' will be used.
-     * @param string $port     The proxmox port in wich proxmox is listening on.
-     *                         If no value is passed '8006' will be assumed.
-     */
-    public function __construct(
-        $hostname,
-        $username,
-        $password,
-        $realm = 'pam',
-        $port = '8006'
-    ) {
-        $this->hostname = $hostname;
-        $this->username = $username;
-        $this->password = $password;
-        $this->realm = $realm;
-        $this->port = $port;
+        $this->hostname = $credentials['hostname'];
+        $this->username = $credentials['username'];
+        $this->password = $credentials['password'];
+        $this->realm = $credentials['realm'];
+        $this->port = $credentials['port'];
     }
 
 
     /**
-     * Returns the proxmox hostname associated to this AuthToken.
+     * Gives back the string representation of this credentials object.
      *
-     * @return string The proxmox hostname.
+     * @return string Credentials data in single string.
      */
-    public function getHostname()
+    public function __toString()
     {
-        return $this->hostname;
-    }
-
-
-    /**
-     * Returns the proxmox username associated with this AuthToken.
-     *
-     * @return string The proxmox username.
-     */
-    public function getUsername()
-    {
-        return $this->username;
-    }
-
-
-    /**
-     * Returns the proxmox password associated with this AuthToken.
-     *
-     * @return string The proxmox password.
-     */
-    public function getPassword()
-    {
-        return $this->password;
-    }
-
-
-    /**
-     * Returns the proxmox realm used in this AuthToken.
-     *
-     * @return string The proxmox realm without the @ symbol.
-     */
-    public function getRealm()
-    {
-        return $this->realm;
-    }
-
-
-    /**
-     * Returns the port in wich proxmox is listening.
-     *
-     * @return string The proxmox port.
-     */
-    public function getPort()
-    {
-        return $this->port;
+        return sprintf(
+            '[Host: %s:%s], [Username: %s@%s], [Password: %s].',
+            $this->hostname,
+            $this->port,
+            $this->username,
+            $this->realm,
+            $this->password
+        );
     }
 
 
@@ -144,41 +68,171 @@ class Credentials
      */
     public function getApiUrl()
     {
-        return 'https://' . $this->hostname . ':' . $this->port . '/api2/json';
+        return 'https://' . $this->hostname . ':' . $this->port . '/api2';
     }
 
 
     /**
-     * Attempts to login using this credentials, if succeeded will return the
-     * AuthToken used in all requests.
+     * Gets the hostname configured in this credentials object.
      *
-     * @return \ProxmoxVE\AuthToken|bool If login fails will return
-     *                                             false otherwise will return
-     *                                             the AuthToken.
+     * @return string The hostname in the credentials.
      */
-    public function login()
+    public function getHostname()
     {
-        $params = array(
-            'username' => $this->username,
-            'password' => $this->password,
-            'realm' => $this->realm,
-        );
+        return $this->hostname;
+    }
 
-        $params = http_build_query($params);
-        $url = $this->getApiUrl() . '/access/ticket';
 
-        $response = ProxmoxVE::request($url, 'POST', $params);
+    /**
+     * Gets the username given to this credentials object.
+     *
+     * @return string The username in the credentials.
+     */
+    public function getUsername()
+    {
+        return $this->username;
+    }
 
-        $login = json_decode($response, true);
 
-        if (!$login) { // Failed authentication
-            return false;
+    /**
+     * Gets the password set in this credentials object.
+     *
+     * @return string The password in the credentials.
+     */
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
+
+    /**
+     * Gets the realm used in this credentials object.
+     *
+     * @return string The realm in this credentials.
+     */
+    public function getRealm()
+    {
+        return $this->realm;
+    }
+
+
+    /**
+     * Gets the port configured in this credentials object.
+     *
+     * @return string The port in the credentials.
+     */
+    public function getPort()
+    {
+        return $this->port;
+    }
+
+
+    /**
+     * Given the custom credentials object it will try to find the required
+     * values to use it as the proxmox credentials, this can be an object with
+     * accesible properties, getter methods or an object that uses '__get' to
+     * access properties dinamically.
+     *
+     * @param mixed $credentials
+     *
+     * @return array|null If credentials are found they are returned as an
+     *                    associative array, returns null if object can not be
+     *                    used as a credentials provider.
+     */
+    public function parseCustomCredentials($credentials)
+    {
+        if (is_array($credentials)) {
+            $requiredKeys = ['hostname', 'username', 'password'];
+            $credentialsKeys = array_keys($credentials);
+
+            $found = count(array_intersect($requiredKeys, $credentialsKeys));
+
+            if ($found != count($requiredKeys)) {
+                return null;
+            }
+
+            // Set default realm and port if are not in the array.
+            if (!isset($credentials['realm'])) {
+                $credentials['realm'] = 'pam';
+            }
+
+            if (!isset($credentials['port'])) {
+                $credentials['port'] = '8006';
+            }
+
+            return $credentials;
         }
 
-        return new AuthToken(
-            $login['data']['CSRFPreventionToken'],
-            $login['data']['ticket'],
-            $login['data']['username']
-        );
+        if (!is_object($credentials)) {
+            return null;
+        }
+
+        // Trying to find variables
+        $objectProperties = array_keys(get_object_vars($credentials));
+        $requiredProperties = ['hostname', 'username', 'password'];
+
+        // Needed properties exists in the object?
+        $found = count(array_intersect($requiredProperties, $objectProperties));
+        if ($found == count($requiredProperties)) {
+            $realm = in_array('realm', $objectProperties)
+                ? $credentials->realm
+                : 'pam';
+
+            $port = in_array('port', $objectProperties)
+                ? $credentials->port
+                : '8006';
+
+            return [
+                'hostname' => $credentials->hostname,
+                'username' => $credentials->username,
+                'password' => $credentials->password,
+                'realm' => $realm,
+                'port' => $port,
+            ];
+        }
+
+
+        // Trying to find getters
+        $objectMethods = get_class_methods($credentials);
+        $requiredMethods = ['getHostname', 'getUsername', 'getPassword'];
+
+        // Needed functions exists in the object?
+        $found = count(array_intersect($requiredMethods, $objectMethods));
+        if ($found == count($requiredMethods)) {
+            $realm = method_exists($credentials, 'getRealm')
+                ? $credentials->getRealm()
+                : 'pam';
+
+            $port = method_exists($credentials, 'getPort')
+                ? $credentials->getPort()
+                : '8006';
+
+            return [
+                'hostname' => $credentials->getHostname(),
+                'username' => $credentials->getUsername(),
+                'password' => $credentials->getPassword(),
+                'realm' => $realm,
+                'port' => $port,
+            ];
+        }
+
+        // Get properties of object using magic method __get
+        if (in_array('__get', $objectMethods)) {
+            $hasHostname = $credentials->hostname;
+            $hasUsername = $credentials->username;
+            $hasPassword = $credentials->password;
+
+            if ($hasHostname and $hasUsername and $hasPassword) {
+                return [
+                    'hostname' => $credentials->hostname,
+                    'username' => $credentials->username,
+                    'password' => $credentials->password,
+                    'realm' => $credentials->realm ?: 'pam',
+                    'port' => $credentials->port ?: '8006',
+                ];
+            }
+        }
     }
+
 }
+

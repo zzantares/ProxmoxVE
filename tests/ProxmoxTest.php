@@ -13,23 +13,23 @@ namespace ProxmoxVE;
  */
 class ProxmoxTest extends \PHPUnit_Framework_TestCase
 {
-    protected function getMockProxmox($credentials, $method, $return = null)
+    protected function getMockProxmox($method = null, $return = null)
     {
-        $proxmox = $this->getMockBuilder('ProxmoxVE\Proxmox')
-                        ->setMethods(array($method))
-                        ->disableOriginalConstructor()
-                        // Can't mock the login method when object isn't created
-                        //->setConstructorArgs(array($credentials))
-                        ->getMock();
+        if ($method) {
+            $proxmox = $this->getMockBuilder('ProxmoxVE\Proxmox')
+                            ->setMethods(array($method))
+                            ->disableOriginalConstructor()
+                            ->getMock();
 
-        $proxmox->expects($this->any())
-                ->method($method)
-                ->will($this->returnValue($return));
+            $proxmox->expects($this->any())
+                    ->method($method)
+                    ->will($this->returnValue($return));
 
-        /**
-         * We are tricking us! This is not good X_x!
-         */
-        $proxmox->setCredentials($credentials);
+        } else {
+            $proxmox = $this->getMockBuilder('ProxmoxVE\Proxmox')
+                            ->disableOriginalConstructor()
+                            ->getMock();
+        }
 
         return $proxmox;
     }
@@ -97,140 +97,50 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function testCanGetAndSetProxmoxCredentials()
-    {
-        $credentialsA = [
-            'hostname' => 'my.proxmox.tld',
-            'username' => 'root',
-            'password' => 'English motherfucker, do you speak it?',
-        ];
-
-        $fakeToken = new AuthToken('csrf', 'ticket', 'user');
-        $proxmox = $this->getMockProxmox($credentialsA, 'login', $fakeToken);
-
-        // Add default values for credentials
-        $credentialsA['realm'] = 'pam';
-        $credentialsA['port'] = '8006';
-        $this->assertEquals($proxmox->getCredentials(), $credentialsA);
-
-        $credentialsB = [
-            'hostname' => 'your.proxmox.tld',
-            'username' => 'peluca',
-            'password' => 'Another cool phrase here',
-        ];
-
-        $proxmox->setCredentials($credentialsB);
-
-        // Add default values for credentials
-        $credentialsB['realm'] = 'pam';
-        $credentialsB['port'] = '8006';
-        $this->assertEquals($proxmox->getCredentials(), $credentialsB);
-    }
-
-
     /**
-     * @expectedException ProxmoxVE\Exception\MalformedCredentialsException
+     * @expectedException GuzzleHttp\Exception\RequestException
      */
-    public function testExceptionIsThrownWhenSettingBadCredentials()
+    public function testProxmoxExceptionIsNotThrownWhenUsingMagicCredentialsObject()
     {
-        $credentials = [
-            'hostname' => 'some.proxmox.tld',
-            'username' => 'Daedaleus',
-            'password' => 'Point',
-        ];
-
-        $fakeToken = new AuthToken('csrf', 'ticket', 'user');
-        $proxmox = $this->getMockProxmox($credentials, 'login', $fakeToken);
-
-        $proxmox->setCredentials('Bad credentials passed!');
-    }
-
-
-    /**
-     * @expectedException ProxmoxVE\Exception\MalformedCredentialsException
-     */
-    public function testExceptionIsThrownWhenSettingBadCredentialsArray()
-    {
-        $credentials = [
-            'hostname' => 'some.proxmox.tld',
-            'username' => 'root',
-            'password' => 'toor',
-        ];
-
-        $fakeToken = new AuthToken('csrf', 'ticket', 'user');
-        $proxmox = $this->getMockProxmox($credentials, 'login', $fakeToken);
-
-        $proxmox->setCredentials(['un', 'dos', 'tres', 'por todos mis amigos']);
-    }
-
-
-    /**
-     * @expectedException ProxmoxVE\Exception\MalformedCredentialsException
-     */
-    public function testExceptionIsThrownWhenSettingIncompleteCredentialsArray()
-    {
-        $credentials = [
-            'hostname' => 'a.proxmox.tld',
-            'username' => 'user',
-            'password' => 'secret',
-        ];
-
-        $fakeToken = new AuthToken('csrf', 'ticket', 'user');
-        $proxmox = $this->getMockProxmox($credentials, 'login', $fakeToken);
-
-        $proxmox->setCredentials([
-            'username' => 'Sample username',
-            'password' => 'Sample password',
-        ]);
-    }
-
-
-    /**
-     * @expectedException ProxmoxVE\Exception\MalformedCredentialsException
-     */
-    public function testExceptionIsThrownWhenPassingBadCredentialsObject()
-    {
-        $credentials = [
-            'hostname' => 'a.proxmox.tld',
-            'username' => 'user',
-            'password' => 'secret',
-        ];
-
-        $fakeToken = new AuthToken('csrf', 'ticket', 'user');
-        $proxmox = $this->getMockProxmox($credentials, 'login', $fakeToken);
-
-        $credentials = new CustomClasses\Person('Rubius Hadridge', 40);
-        $proxmox->setCredentials($credentials);
-    }
-
-
-    public function testExceptionIsNotThrownWhenUsingMagicCredentialsObject()
-    {
-        $fakeToken = new AuthToken('csrf', 'ticket', 'user');
-
         $credentials = new CustomClasses\MagicCredentials();
-        $proxmox = $this->getMockProxmox($credentials, 'login', $fakeToken);
+        $proxmox = new Proxmox($credentials);
     }
 
 
     public function testGetCredentialsWithAllValues()
     {
-        $credentials = [
+        $ids = [
             'hostname' => 'some.proxmox.tld',
             'username' => 'root',
             'password' => 'I was here',
         ];
 
-        $fakeToken = new AuthToken('csrf', 'ticket', 'user');
+        $fakeAuthToken = new AuthToken('csrf', 'ticket', 'username');
+        $proxmox = $this->getMockProxmox('login', $fakeAuthToken);
+        $proxmox->setCredentials($ids);
 
-        $proxmox = $this->getMockProxmox($credentials, 'login', $fakeToken);
         $credentials = $proxmox->getCredentials();
 
-        $this->assertNotNull($credentials['hostname']);
-        $this->assertNotNull($credentials['username']);
-        $this->assertNotNull($credentials['password']);
-        $this->assertNotNull($credentials['realm']);
-        $this->assertNotNull($credentials['port']);
+        $this->assertEquals($credentials->hostname, $ids['hostname']);
+        $this->assertEquals($credentials->username, $ids['username']);
+        $this->assertEquals($credentials->password, $ids['password']);
+        $this->assertEquals($credentials->realm, 'pam');
+        $this->assertEquals($credentials->port, '8006');
+    }
+
+
+    /**
+     * @expectedException Exception
+     */
+    public function testUnresolvedHostnameThrowsException()
+    {
+        $credentials = [
+            'hostname' => 'proxmox.example.tld',
+            'username' => 'user',
+            'password' => 'pass',
+        ];
+
+        $proxmox = new Proxmox($credentials);
     }
 
 
@@ -255,6 +165,10 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
 
     //public function testGetResourceInTheDesiredResponseFormat()
     //{
+    //          var_dump($ex);
+    //          full reference.full reference.
+    //
+    //
     //    $proxmox = $kj
     //}
 
