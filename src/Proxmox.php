@@ -46,7 +46,14 @@ class Proxmox extends ProxmoxVE
     private $fakeType;
 
 
+    /**
+     * Stores the ProxmoxVE user session such as ticket, username and csrf
+     * prevention token, are all in there.
+     *
+     * @var \ProxmoxVE\AuthToken
+     */
     private $authToken;
+
 
     /**
      * Constructor.
@@ -192,6 +199,17 @@ class Proxmox extends ProxmoxVE
     }
 
 
+    /**
+     * Send a request to a given Proxmox API resource.
+     *
+     * @param string $actionPath The resource tree path you want to request, see
+     *                           more at http://pve.proxmox.com/pve2-api-doc/
+     * @param array $params      An associative array filled with params.
+     * @param string $method     HTTP method used in the request, by default
+     *                           'GET' method will be used.
+     *
+     * @return \Guzzle\Http\Message\Response
+     */
     private function requestResource($actionPath, $params = [], $method = 'GET')
     {
         $url = $this->getApiUrl() . $actionPath;
@@ -199,6 +217,12 @@ class Proxmox extends ProxmoxVE
         $cookies = [
             'PVEAuthCookie' => $this->authToken->getTicket(),
         ];
+
+        if ($method != 'GET') {
+            $headers = [
+                'CSRFPreventionToken' => $this->authToken->getCsrf(),
+            ];
+        }
 
         switch ($method) {
             case 'GET':
@@ -210,16 +234,36 @@ class Proxmox extends ProxmoxVE
                 ]);
                 break;
             case 'POST':
+                return $this->httpClient->post($url, [
+                    'verify' => false,
+                    'exceptions' => false,
+                    'cookies' => $cookies,
+                    'headers' => $headers,
+                    'body' => $params,
+                ]);
                 break;
             case 'PUT':
+                return $this->httpClient->put($url, [
+                    'verify' => false,
+                    'exceptions' => false,
+                    'cookies' => $cookies,
+                    'headers' => $headers,
+                    'body' => $params,
+                ]);
                 break;
             case 'DELETE':
+                return $this->httpClient->delete($url, [
+                    'verify' => false,
+                    'exceptions' => false,
+                    'cookies' => $cookies,
+                    'headers' => $headers,
+                    'body' => $params,
+                ]);
                 break;
             default:
                 $errorMessage = "HTTP Request method {$method} not allowed.";
                 throw new \InvalidArgumentException($errorMessage);
         }
-
     }
 
 
@@ -358,7 +402,7 @@ class Proxmox extends ProxmoxVE
      * @return mixed The parsed response, depending on the response type can be
      *               an array or a string.
      */
-    public function processHttpResponse($response)
+    private function processHttpResponse($response)
     {
         switch ($this->fakeType) {
             case 'pngb64':

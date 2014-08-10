@@ -11,66 +11,8 @@ namespace ProxmoxVE;
 /**
  * @author César Muñoz <zzantares@gmail.com>
  */
-class ProxmoxTest extends \PHPUnit_Framework_TestCase
+class ProxmoxTest extends TestCase
 {
-    protected function getMockProxmox($method = null, $return = null)
-    {
-        if ($method) {
-            $proxmox = $this->getMockBuilder('ProxmoxVE\Proxmox')
-                            ->setMethods(array($method))
-                            ->disableOriginalConstructor()
-                            ->getMock();
-
-            $proxmox->expects($this->any())
-                    ->method($method)
-                    ->will($this->returnValue($return));
-
-        } else {
-            $proxmox = $this->getMockBuilder('ProxmoxVE\Proxmox')
-                            ->disableOriginalConstructor()
-                            ->getMock();
-        }
-
-        return $proxmox;
-    }
-
-
-    protected function getProxmox($response)
-    {
-        $httpClient = $this->getMockHttpClient(true, $response);
-
-        $credentials = [
-            'hostname' => 'my.proxmox.tld',
-            'username' => 'root',
-            'password' => 'toor',
-        ];
-
-        return new Proxmox($credentials, null, $httpClient);
-    }
-
-
-    protected function getMockHttpClient($successfulLogin, $response = null)
-    {
-        if ($successfulLogin) {
-            $data = '{"data":{"CSRFPreventionToken":"csrf","ticket":"ticket","username":"random"}}';
-            $login = "HTTP/1.1 202 OK\r\nContent-Length: 0\r\n\r\n{$data}";
-        } else {
-            $login = "HTTP/1.1 400\r\nContent-Length: 0\r\n\r\n";
-        }
-
-        $mock = new \GuzzleHttp\Subscriber\Mock([
-            $login,
-            "HTTP/1.1 202 OK\r\nContent-Length: 0\r\n\r\n{$response}",
-        ]);
-
-        $httpClient = new \GuzzleHttp\Client();
-        $httpClient->getEmitter()->attach($mock);
-
-
-        return $httpClient;
-    }
-
-
     /**
      * @expectedException ProxmoxVE\Exception\MalformedCredentialsException
      */
@@ -194,6 +136,37 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
         $httpClient = $this->getMockHttpClient(false); // Simulate failed login
 
         $proxmox = new Proxmox($credentials, null, $httpClient);
+    }
+
+
+    public function testGetAndSetResponseType()
+    {
+        $proxmox = $this->getProxmox(null);
+        $this->assertEquals($proxmox->getResponseType(), 'array');
+
+        $proxmox->setResponseType('json');
+        $this->assertEquals($proxmox->getResponseType(), 'json');
+
+        $proxmox->setResponseType('html');
+        $this->assertEquals($proxmox->getResponseType(), 'html');
+
+        $proxmox->setResponseType('extjs');
+        $this->assertEquals($proxmox->getResponseType(), 'extjs');
+
+        $proxmox->setResponseType('text');
+        $this->assertEquals($proxmox->getResponseType(), 'text');
+
+        $proxmox->setResponseType('png');
+        $this->assertEquals($proxmox->getResponseType(), 'png');
+
+        $proxmox->setResponseType('pngb64');
+        $this->assertEquals($proxmox->getResponseType(), 'pngb64');
+
+        $proxmox->setResponseType('object');
+        $this->assertEquals($proxmox->getResponseType(), 'object');
+
+        $proxmox->setResponseType('other');
+        $this->assertEquals($proxmox->getResponseType(), 'array');
     }
 
 
