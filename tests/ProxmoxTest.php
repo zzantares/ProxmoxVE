@@ -35,6 +35,42 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
     }
 
 
+    protected function getProxmox($response)
+    {
+        $httpClient = $this->getMockHttpClient(true, $response);
+
+        $credentials = [
+            'hostname' => 'my.proxmox.tld',
+            'username' => 'root',
+            'password' => 'toor',
+        ];
+
+        return new Proxmox($credentials, null, $httpClient);
+    }
+
+
+    protected function getMockHttpClient($successfulLogin, $response = null)
+    {
+        if ($successfulLogin) {
+            $data = '{"data":{"CSRFPreventionToken":"csrf","ticket":"ticket","username":"random"}}';
+            $login = "HTTP/1.1 202 OK\r\nContent-Length: 0\r\n\r\n{$data}";
+        } else {
+            $login = "HTTP/1.1 400\r\nContent-Length: 0\r\n\r\n";
+        }
+
+        $mock = new \GuzzleHttp\Subscriber\Mock([
+            $login,
+            "HTTP/1.1 202 OK\r\nContent-Length: 0\r\n\r\n{$response}",
+        ]);
+
+        $httpClient = new \GuzzleHttp\Client();
+        $httpClient->getEmitter()->attach($mock);
+
+
+        return $httpClient;
+    }
+
+
     /**
      * @expectedException ProxmoxVE\Exception\MalformedCredentialsException
      */
@@ -149,28 +185,67 @@ class ProxmoxTest extends \PHPUnit_Framework_TestCase
      */
     public function testLoginErrorThrowsException()
     {
-        /**
-         * This is real, need to mock guzzle to not send the http request.
-         */
-
         $credentials = [
-            'hostname' => 'centos.vpservers.com',
+            'hostname' => 'proxmox.server.tld',
             'username' => 'are not',
             'password' => 'valid folks!',
         ];
 
-        $proxmox = new Proxmox($credentials);
+        $httpClient = $this->getMockHttpClient(false); // Simulate failed login
+
+        $proxmox = new Proxmox($credentials, null, $httpClient);
     }
 
 
-    //public function testGetResourceInTheDesiredResponseFormat()
-    //{
-    //          var_dump($ex);
-    //          full reference.full reference.
-    //
-    //
-    //    $proxmox = $kj
-    //}
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testGetResourceWithBadParamsThrowsException()
+    {
+        $proxmox = $this->getProxmox(null);
+        $proxmox->get('/someResource', 'wrong params here');
+    }
+
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testCreateResourceWithBadParamsThrowsException()
+    {
+        $proxmox = $this->getProxmox(null);
+        $proxmox->create('/someResource', 'wrong params here');
+    }
+
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testSetResourceWithBadParamsThrowsException()
+    {
+        $proxmox = $this->getProxmox(null);
+        $proxmox->set('/someResource', 'wrong params here');
+    }
+
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testDeleteResourceWithBadParamsThrowsException()
+    {
+        $proxmox = $this->getProxmox(null);
+        $proxmox->delete('/someResource', 'wrong params here');
+    }
+
+
+    public function testGetResource()
+    {
+        $fakeResponse = <<<'EOD'
+{"data":[{"disk":940244992,"cpu":0.000998615325210486,"maxdisk":5284429824,"maxmem":1038385152,"node":"office","maxcpu":1,"level":"","uptime":3296027,"id":"node/office","type":"node","mem":311635968}]}
+EOD;
+        $proxmox = $this->getProxmox($fakeResponse);
+
+        $this->assertEquals($proxmox->get('/nodes'), json_decode($fakeResponse, true));
+    }
 
 }
 

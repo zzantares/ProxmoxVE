@@ -29,15 +29,6 @@ class Proxmox extends ProxmoxVE
 
 
     /**
-     * Holds the value of the base API URL, by default response is in JSON.
-     * Sample value: https://my-proxmox:8006/api2/json
-     *
-     * @var string
-     */
-    private $apiUrl;
-
-
-    /**
      * Holds the response type used to requests the API, possible values are
      * json, extjs, html, text, png.
      *
@@ -54,6 +45,8 @@ class Proxmox extends ProxmoxVE
      */
     private $fakeType;
 
+
+    private $authToken;
 
     /**
      * Constructor.
@@ -75,6 +68,8 @@ class Proxmox extends ProxmoxVE
 
         // Set credentials and login to the Proxmox server.
         $this->setCredentials($credentials);
+
+        $this->setResponseType($responseType);
     }
 
 
@@ -151,7 +146,7 @@ class Proxmox extends ProxmoxVE
         }
 
         $this->credentials = $credentials;
-        $this->token = $this->login();
+        $this->authToken = $this->login();
     }
 
 
@@ -164,26 +159,25 @@ class Proxmox extends ProxmoxVE
     {
         $supportedFormats = array('json', 'html', 'extjs', 'text', 'png');
 
-        if (!in_array($responseType, $supportedFormats)) {
-            if ($responseType == 'pngb64') {
-                $this->fakeType = 'pngb64';
-                $this->responseType = 'png';
-                return;
+        if (in_array($responseType, $supportedFormats)) {
+            $this->fakeType = false;
+            $this->responseType = $responseType;
+        } else {
+            switch ($responseType) {
+                case 'pngb64':
+                    $this->fakeType = 'pngb64';
+                    $this->responseType = 'png';
+                    break;
+                case 'object':
+                case 'array':
+                    $this->responseType = 'json';
+                    $this->fakeType = $responseType;
+                    break;
+                default:
+                    $this->responseType = 'json';
+                    $this->fakeType = 'array'; // Default format
             }
-
-            $this->responseType = 'json';
-
-            if ($responseType == 'object') {
-                $this->fakeType = $responseType;
-            } else {
-                $this->fakeType = 'array';  // Default format
-            }
-
-            return;
         }
-
-        $this->fakeType = false;
-        $this->responseType = $responseType;
     }
 
 
@@ -198,6 +192,35 @@ class Proxmox extends ProxmoxVE
     }
 
 
+    private function requestResource($actionPath, $params = [], $method = 'GET')
+    {
+        $url = $this->getApiUrl() . $actionPath;
+
+        $cookies = [
+            'PVEAuthCookie' => $this->authToken->getTicket(),
+        ];
+
+        switch ($method) {
+            case 'GET':
+                return $this->httpClient->get($url, [
+                    'verify' => false,
+                    'exceptions' => false,
+                    'cookies' => $cookies,
+                    'query' => $params,
+                ]);
+                break;
+            case 'POST':
+                break;
+            case 'PUT':
+                break;
+            case 'DELETE':
+                break;
+            default:
+                $errorMessage = "HTTP Request method {$method} not allowed.";
+                throw new \InvalidArgumentException($errorMessage);
+        }
+
+    }
 
 
     /**
@@ -211,7 +234,7 @@ class Proxmox extends ProxmoxVE
      *
      * @throws \InvalidArgumentException
      */
-    public function get($actionPath, $params = array())
+    public function get($actionPath, $params = [])
     {
         if (!is_array($params)) {
             $errorMessage = 'GET params should be an associative array.';
@@ -223,9 +246,8 @@ class Proxmox extends ProxmoxVE
             $actionPath = '/' . $actionPath;
         }
 
-        $url = $this->apiUrl . $actionPath;
-
-        return $this->processResponse(parent::get($url, $params));
+        $response = $this->requestResource($actionPath, $params);
+        return $this->processHttpResponse($response);
     }
 
 
@@ -240,7 +262,7 @@ class Proxmox extends ProxmoxVE
      *
      * @throws \InvalidArgumentException
      */
-    public function set($actionPath, $params = array())
+    public function set($actionPath, $params = [])
     {
         if (!is_array($params)) {
             $errorMessage = 'PUT params should be an associative array.';
@@ -252,9 +274,8 @@ class Proxmox extends ProxmoxVE
             $actionPath = '/' . $actionPath;
         }
 
-        $url = $this->apiUrl . $actionPath;
-
-        return $this->processResponse(parent::put($url, $params));
+        $response = $this->requestResource($actionPath, $params, 'PUT');
+        return $this->processHttpResponse($response);
     }
 
 
@@ -269,7 +290,7 @@ class Proxmox extends ProxmoxVE
      *
      * @throws \InvalidArgumentException
      */
-    public function create($actionPath, $params = array())
+    public function create($actionPath, $params = [])
     {
         if (!is_array($params)) {
             $errorMessage = 'POST params should be an asociative array.';
@@ -281,9 +302,8 @@ class Proxmox extends ProxmoxVE
             $actionPath = '/' . $actionPath;
         }
 
-        $url = $this->apiUrl . $actionPath;
-
-        return $this->processResponse(parent::post($url, $params));
+        $response = $this->requestResource($actionPath, $params, 'POST');
+        return $this->processHttpResponse($response);
     }
 
 
@@ -298,7 +318,7 @@ class Proxmox extends ProxmoxVE
      *
      * @throws \InvalidArgumentException
      */
-    public function delete($actionPath, $params = array())
+    public function delete($actionPath, $params = [])
     {
         if (!is_array($params)) {
             $errorMessage = 'DELETE params should be an associative array.';
@@ -310,9 +330,8 @@ class Proxmox extends ProxmoxVE
             $actionPath = '/' . $actionPath;
         }
 
-        $url = $this->apiUrl . $actionPath;
-
-        return $this->processResponse(parent::delete($url, $params));
+        $response = $this->requestResource($actionPath, $params, 'DELETE');
+        return $this->processHttpResponse($response);
     }
 
 
@@ -321,165 +340,38 @@ class Proxmox extends ProxmoxVE
 
     /**
      * Returns the proxmox API URL where requests are sended.
+     * Sample value: https://my-proxmox:8006/api2/json
      *
      * @return string Proxmox API URL.
      */
     public function getApiUrl()
     {
-        return 'https://' . $this->credentials->getHostname() . ':'
-            . $this->credentials->getPort() . '/api2/' . $this->responseType;
+        return $this->credentials->getApiUrl() . '/' . $this->responseType;
     }
 
 
     /**
      * Parses the response to the desired return type.
      *
-     * @param string $response Response sended by the Proxmox server.
+     * @param string $response Response sent by the Proxmox server.
      *
      * @return mixed The parsed response, depending on the response type can be
      *               an array or a string.
      */
-    public function processResponse($response)
+    public function processHttpResponse($response)
     {
-        if ($this->fakeType) {
-            if ($this->fakeType == 'pngb64') {
-                $base64 = base64_encode($response);
+        switch ($this->fakeType) {
+            case 'pngb64':
+                $base64 = base64_encode($response->getBody());
                 return 'data:image/png;base64,' . $base64;
-            }
-
-            // For now 'object' is not supported, so we return array by default.
-            return json_decode($response, true);
-            // Later on need to add a check to see if is 'array' or 'object'
+                break;
+            case 'object': // 'object' not supported yet, we return array instead.
+            case 'array':
+                return $response->json();
+                break;
+            default:
+                return $response->getBody()->__toString();
         }
-
-        // Other types of response doesn't need any treatment
-        return $response;
-    }
-
-
-    /**
-     * Attempts to validate an object to see if can be used as a credentials
-     * provider. This is helpful in the case you have an Eloquent model that
-     * already acts as a credentials object.
-     *
-     * @param object $credentials Object with accessible properties or getters.
-     *
-     * @return bool false If the object can't be used as a credentials provider.
-     */
-    public function validCredentialsObject($credentials)
-    {
-        if (!is_object($credentials)) {
-            $this->accessibleBy = false;
-            return false;
-        }
-
-        // Trying to find variables
-        $vars = array_keys(get_object_vars($credentials));
-        $properties = array(
-            'hostname',
-            'username',
-            'password',
-        );
-
-        // Needed properties exists in the object?
-        $found = count(array_intersect($properties, $vars));
-        if ($found == count($properties)) {
-            $this->accessibleBy = 'properties';
-            return true;
-        }
-
-        // Trying to find getters
-        $methods = get_class_methods($credentials);
-        $functions = array(
-            'getHostname',
-            'getUsername',
-            'getPassword',
-        );
-
-        // Needed functions exists in the object?
-        $found = count(array_intersect($functions, $methods));
-        if ($found == count($functions)) {
-            $this->accessibleBy = 'methods';
-            return true;
-        }
-        // Find properties that are using magic function
-
-        $hasHostname = isset($credentials->hostname);
-        $hasUsername = isset($credentials->username);
-        $hasPassword = isset($credentials->password);
-
-        if ($hasHostname and $hasUsername and $hasPassword) {
-            $this->accessibleBy = '__get';
-            return true;
-        }
-
-        $this->accessibleBy = false;
-        return false;
-    }
-
-
-    /**
-     * When a custom object is used as a credentials object this function will
-     * attempt to login to the Proxmox server. Later on, logic will be rewritten
-     * to not depend on the Credentials class.
-     *
-     * @param object $credentials A custom object holding proxmox login data.
-     */
-    protected function loginUsingCredentials($credentials)
-    {
-
-        if ($this->accessibleBy == 'properties') {
-            return new Credentials(
-                $credentials->hostname,
-                $credentials->username,
-                $credentials->password,
-                isset($credentials->realm) ? $credentials->realm : 'pam',
-                isset($credentials->port) ? $credentials->port : '8006'
-            );
-        }
-
-        // In eloquent models properties not set are emppty thus not null
-        if ($this->accessibleBy == '__get') {
-            return new Credentials(
-                $credentials->hostname,
-                $credentials->username,
-                $credentials->password,
-                empty($credentials->realm) ? 'pam' : $credentials->realm,
-                empty($credentials->port) ? '8006' : $credentials->port
-            );
-        }
-
-        if ($this->accessibleBy == 'methods') {
-            if (method_exists($credentials, 'getRealm')) {
-                $realm = $credentials->getRealm();
-            } else {
-                $realm = 'pam';
-            }
-
-            if (method_exists($credentials, 'getPort')) {
-            } else {
-                $port = $credentials->getPort();
-                $port = '8006';
-            }
-
-            return new Credentials(
-                $credentials->getHostname(),
-                $credentials->getUsername(),
-                $credentials->getPassword(),
-                $realm,
-                $port
-            );
-        }
-
-        /**
-         * Maybe we need to implement this type of accesor?
-         * $credentials->get('hostname');
-         */
-
-        // At this point this code can't be executed so ...
-        //$error = "This can't happen, run in circles or do something else.";
-
-        //throw new \RuntimeException($error);
     }
 
 
@@ -517,17 +409,6 @@ class Proxmox extends ProxmoxVE
 
 
     /**
-     * Retrieves a specific node defined in the resources tree as '/nodes/node'.
-     *
-     * @return mixed The processed response, can be an array, string or object.
-     */
-    public function getNode($nodeName)
-    {
-        return $this->get('/nodes/' . $nodeName);
-    }
-
-
-    /**
      * Retrieves the '/pools' resource of the Proxmox API resources tree.
      *
      * @return mixed The processed response, can be an array, string or object.
@@ -535,17 +416,6 @@ class Proxmox extends ProxmoxVE
     public function getPools()
     {
         return $this->get('/pools');
-    }
-
-
-    /**
-     * Retrieves a specific pool defined in the resources tree as '/pools/pool'.
-     *
-     * @return mixed The processed response, can be an array, string or object.
-     */
-    public function getPool($poolId)
-    {
-        return $this->get('/pools/' . $poolId);
     }
 
 
@@ -561,32 +431,6 @@ class Proxmox extends ProxmoxVE
         }
 
         return $this->create('/pools', $poolData);
-    }
-
-
-    /**
-     * Sets the passed data in the specified pool (updates the pool info).
-     *
-     * @return mixed The processed response, can be an array, string or object.
-     */
-    public function setPool($poolId, $poolData = array())
-    {
-        if (!is_array($poolData)) {
-            throw new \InvalidArgumentException('Pool data needs to be array');
-        }
-
-        return $this->set('/pools/' . $poolId, $poolData);
-    }
-
-
-    /**
-     * Deletes the specified pool from the '/pools' resources tree.
-     *
-     * @return mixed The processed response, can be an array, string or object.
-     */
-    public function deletePool($poolId)
-    {
-        return $this->delete('/pools/' . $poolId);
     }
 
 
@@ -643,42 +487,13 @@ class Proxmox extends ProxmoxVE
 
 
     /**
-     * Retrieves a specified storage matching the passed storage identifier.
+     * Retrieves the '/version' resource of the Proxmox API resources tree.
      *
      * @return mixed The processed response, can be an array, string or object.
      */
-    public function getStorage($storageId)
+    public function getVersion()
     {
-        return $this->get('/storage/' . $storageId);
-    }
-
-
-    /**
-     * Sets the passed data into the specified storage (updates the storage
-     * info).
-     *
-     * @return mixed The processed response, can be an array, string or object.
-     */
-    public function setStorage($storageId, $storageData = array())
-    {
-        if (!is_array($storageData)) {
-            $errorMessage = 'Storage data needs to be array';
-            throw new \InvalidArgumentException($errorMessage);
-        }
-
-        return $this->set('/storage/' . $storageId, $storageData);
-    }
-
-
-    /**
-     * Deletes the storage from the '/storage' resources tree that matches the
-     * passed storage identifier.
-     *
-     * @return mixed The processed response, can be an array, string or object.
-     */
-    public function deleteStorage($storageId)
-    {
-        return $this->delete('/storage/' . $storageId);
+        return $this->get('/version');
     }
 
 }

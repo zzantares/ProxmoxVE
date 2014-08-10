@@ -51,5 +51,4 @@ class ProxmoxVE
         return $this->authToken;
     }
 
-
 }
