@@ -545,6 +545,4 @@ class Proxmox
     {
         return $this->get('/version');
     }
-
 }
-

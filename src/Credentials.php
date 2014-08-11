@@ -233,6 +233,4 @@ class Credentials
             }
         }
     }
-
 }
-

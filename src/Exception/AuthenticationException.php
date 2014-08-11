@@ -18,4 +18,3 @@ namespace ProxmoxVE\Exception;
 class AuthenticationException extends \RuntimeException
 {
 }
-

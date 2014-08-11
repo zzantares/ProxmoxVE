@@ -129,6 +129,4 @@ class AuthToken
     {
         return $this->timestamp + 7200 >= time();
     }
-
 }
-
