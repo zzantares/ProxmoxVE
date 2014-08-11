@@ -17,7 +17,7 @@ use ProxmoxVE\Exception\MalformedCredentialsException;
  *
  * @author César Muñoz <zzantares@gmail.com>
  */
-class Credentials extends ProxmoxVE
+class Credentials
 {
     /**
      * Construct.
@@ -27,7 +27,7 @@ class Credentials extends ProxmoxVE
      */
     public function __construct($credentials)
     {
-        // Get credentials object in array form
+        // Get credentials object in valid array form
         $credentials = $this->parseCustomCredentials($credentials);
 
         if (!$credentials) {
@@ -46,7 +46,7 @@ class Credentials extends ProxmoxVE
     /**
      * Gives back the string representation of this credentials object.
      *
-     * @return string Credentials data in single string.
+     * @return string Credentials data in a single string.
      */
     public function __toString()
     {

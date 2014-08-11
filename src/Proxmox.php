@@ -18,7 +18,7 @@ use ProxmoxVE\Exception\AuthenticationException;
  *
  * @author César Muñoz <zzantares@gmail.com>
  */
-class Proxmox extends ProxmoxVE
+class Proxmox
 {
     /**
      * Contains the proxmox server authentication data.
@@ -81,125 +81,6 @@ class Proxmox extends ProxmoxVE
 
 
     /**
-     * Sets the HTTP client to be used to send requests over the network, for
-     * now Guzzle needs to be used.
-     *
-     * @param \GuzzleHttp\Client
-     */
-    public function setHttpClient($httpClient = null)
-    {
-        $this->httpClient = $httpClient ?: new \GuzzleHttp\Client();
-    }
-
-
-    /**
-     * Attempts to login using set credentials, if succeeded will return the
-     * AuthToken used in all requests.
-     *
-     * @return \ProxmoxVE\AuthToken If login fails an AuthenticationException
-     *                              will be thrown otherwise will return the
-     *                              AuthToken.
-     */
-    public function login()
-    {
-        $loginUrl = $this->credentials->getApiUrl() . '/json/access/ticket';
-        $response = $this->httpClient->post($loginUrl, [
-            'verify' => false,
-            'exceptions' => false,
-            'body' => [
-                'username' => $this->credentials->getUsername(),
-                'password' => $this->credentials->getPassword(),
-                'realm' => $this->credentials->getRealm(),
-            ],
-        ]);
-
-        $response = $response->json();
-
-        if (!$response['data']) {
-            $error = 'Can not login using credentials: ' . $this->credentials;
-            throw new AuthenticationException($error);
-        }
-
-        return new AuthToken(
-            $response['data']['CSRFPreventionToken'],
-            $response['data']['ticket'],
-            $response['data']['username']
-        );
-    }
-
-
-    /**
-     * Gets the Credentials object associated with this proxmox API instance.
-     *
-     * @return \ProxmoxVE\Credentials Object containing all proxmox data used to
-     *                                connect to the server.
-     */
-    public function getCredentials()
-    {
-        return $this->credentials;
-    }
-
-
-    /**
-     * Assign the passed Credentials object to the ProxmoxVE.
-     *
-     * @param object $credentials A custom object holding credentials or a
-     *                            Credentials object to assign.
-     */
-    public function setCredentials($credentials)
-    {
-        if (!$credentials instanceof Credentials) {
-            $credentials = new Credentials($credentials);
-        }
-
-        $this->credentials = $credentials;
-        $this->authToken = $this->login();
-    }
-
-
-    /**
-     * Sets the response type that is going to be returned when doing requests.
-     *
-     * @param string $responseType One of json, html, extjs, text, png.
-     */
-    public function setResponseType($responseType = 'array')
-    {
-        $supportedFormats = array('json', 'html', 'extjs', 'text', 'png');
-
-        if (in_array($responseType, $supportedFormats)) {
-            $this->fakeType = false;
-            $this->responseType = $responseType;
-        } else {
-            switch ($responseType) {
-                case 'pngb64':
-                    $this->fakeType = 'pngb64';
-                    $this->responseType = 'png';
-                    break;
-                case 'object':
-                case 'array':
-                    $this->responseType = 'json';
-                    $this->fakeType = $responseType;
-                    break;
-                default:
-                    $this->responseType = 'json';
-                    $this->fakeType = 'array'; // Default format
-            }
-        }
-    }
-
-
-    /**
-     * Returns the response type that is being used by the Proxmox API client.
-     *
-     * @return string Response type being used.
-     */
-    public function getResponseType()
-    {
-        return $this->fakeType ?: $this->responseType;
-    }
-
-
-    /**
      * Send a request to a given Proxmox API resource.
      *
      * @param string $actionPath The resource tree path you want to request, see
@@ -209,6 +90,9 @@ class Proxmox extends ProxmoxVE
      *                           'GET' method will be used.
      *
      * @return \Guzzle\Http\Message\Response
+     *
+     * @throws \InvalidArgumentException If the given HTTP method is not one of
+     *                                   'GET', 'POST', 'PUT', 'DELETE',
      */
     private function requestResource($actionPath, $params = [], $method = 'GET')
     {
@@ -268,6 +152,153 @@ class Proxmox extends ProxmoxVE
 
 
     /**
+     * Parses the response to the desired return type.
+     *
+     * @param string $response Response sent by the Proxmox server.
+     *
+     * @return mixed The parsed response, depending on the response type can be
+     *               an array or a string.
+     */
+    private function processHttpResponse($response)
+    {
+        switch ($this->fakeType) {
+            case 'pngb64':
+                $base64 = base64_encode($response->getBody());
+                return 'data:image/png;base64,' . $base64;
+                break;
+            case 'object': // 'object' not supported yet, we return array instead.
+            case 'array':
+                return $response->json();
+                break;
+            default:
+                return $response->getBody()->__toString();
+        }
+    }
+
+
+    /**
+     * Sets the HTTP client to be used to send requests over the network, for
+     * now Guzzle needs to be used.
+     *
+     * @param \GuzzleHttp\Client
+     */
+    public function setHttpClient($httpClient = null)
+    {
+        $this->httpClient = $httpClient ?: new \GuzzleHttp\Client();
+    }
+
+
+    /**
+     * Attempts to login using set credentials, if succeeded will return the
+     * AuthToken used in all requests.
+     *
+     * @return \ProxmoxVE\AuthToken When successful login will return an
+     *                              instance of the AuthToken class.
+     *
+     * @throws \ProxmoxVE\Exception\AuthenticationException If login fails.
+     */
+    public function login()
+    {
+        $loginUrl = $this->credentials->getApiUrl() . '/json/access/ticket';
+        $response = $this->httpClient->post($loginUrl, [
+            'verify' => false,
+            'exceptions' => false,
+            'body' => [
+                'username' => $this->credentials->getUsername(),
+                'password' => $this->credentials->getPassword(),
+                'realm' => $this->credentials->getRealm(),
+            ],
+        ]);
+
+        $response = $response->json();
+
+        if (!$response['data']) {
+            $error = 'Can not login using credentials: ' . $this->credentials;
+            throw new AuthenticationException($error);
+        }
+
+        return new AuthToken(
+            $response['data']['CSRFPreventionToken'],
+            $response['data']['ticket'],
+            $response['data']['username']
+        );
+    }
+
+
+    /**
+     * Gets the Credentials object associated with this proxmox API instance.
+     *
+     * @return \ProxmoxVE\Credentials Object containing all proxmox data used to
+     *                                connect to the server.
+     */
+    public function getCredentials()
+    {
+        return $this->credentials;
+    }
+
+
+    /**
+     * Assign the passed Credentials object to the ProxmoxVE.
+     *
+     * @param object $credentials A custom object holding credentials or a
+     *                            Credentials object to assign.
+     *
+     * @throws \ProxmoxVE\Exception\AuthenticationException If can not login.
+     */
+    public function setCredentials($credentials)
+    {
+        if (!$credentials instanceof Credentials) {
+            $credentials = new Credentials($credentials);
+        }
+
+        $this->credentials = $credentials;
+        $this->authToken = $this->login();
+    }
+
+
+    /**
+     * Sets the response type that is going to be returned when doing requests.
+     *
+     * @param string $responseType One of json, html, extjs, text, png.
+     */
+    public function setResponseType($responseType = 'array')
+    {
+        $supportedFormats = array('json', 'html', 'extjs', 'text', 'png');
+
+        if (in_array($responseType, $supportedFormats)) {
+            $this->fakeType = false;
+            $this->responseType = $responseType;
+        } else {
+            switch ($responseType) {
+                case 'pngb64':
+                    $this->fakeType = 'pngb64';
+                    $this->responseType = 'png';
+                    break;
+                case 'object':
+                case 'array':
+                    $this->responseType = 'json';
+                    $this->fakeType = $responseType;
+                    break;
+                default:
+                    $this->responseType = 'json';
+                    $this->fakeType = 'array'; // Default format
+            }
+        }
+    }
+
+
+    /**
+     * Returns the response type that is being used by the Proxmox API client.
+     *
+     * @return string Response type being used.
+     */
+    public function getResponseType()
+    {
+        return $this->fakeType ?: $this->responseType;
+    }
+
+
+    /**
      * GET a resource defined in the pvesh tool.
      *
      * @param string $actionPath The resource tree path you want to ask for, see
@@ -276,7 +307,7 @@ class Proxmox extends ProxmoxVE
      *
      * @return array             A PHP array json_decode($response, true).
      *
-     * @throws \InvalidArgumentException
+     * @throws \InvalidArgumentException If given params are not an array.
      */
     public function get($actionPath, $params = [])
     {
@@ -304,7 +335,7 @@ class Proxmox extends ProxmoxVE
      *
      * @return array             A PHP array json_decode($response, true).
      *
-     * @throws \InvalidArgumentException
+     * @throws \InvalidArgumentException If given params are not an array.
      */
     public function set($actionPath, $params = [])
     {
@@ -332,7 +363,7 @@ class Proxmox extends ProxmoxVE
      *
      * @return array             A PHP array json_decode($response, true).
      *
-     * @throws \InvalidArgumentException
+     * @throws \InvalidArgumentException If given params are not an array.
      */
     public function create($actionPath, $params = [])
     {
@@ -360,7 +391,7 @@ class Proxmox extends ProxmoxVE
      *
      * @return array             A PHP array json_decode($response, true).
      *
-     * @throws \InvalidArgumentException
+     * @throws \InvalidArgumentException If given params are not an array.
      */
     public function delete($actionPath, $params = [])
     {
@@ -391,31 +422,6 @@ class Proxmox extends ProxmoxVE
     public function getApiUrl()
     {
         return $this->credentials->getApiUrl() . '/' . $this->responseType;
-    }
-
-
-    /**
-     * Parses the response to the desired return type.
-     *
-     * @param string $response Response sent by the Proxmox server.
-     *
-     * @return mixed The parsed response, depending on the response type can be
-     *               an array or a string.
-     */
-    private function processHttpResponse($response)
-    {
-        switch ($this->fakeType) {
-            case 'pngb64':
-                $base64 = base64_encode($response->getBody());
-                return 'data:image/png;base64,' . $base64;
-                break;
-            case 'object': // 'object' not supported yet, we return array instead.
-            case 'array':
-                return $response->json();
-                break;
-            default:
-                return $response->getBody()->__toString();
-        }
     }
 
 

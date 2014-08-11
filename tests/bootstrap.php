@@ -1,4 +1,10 @@
 <?php
+/**
+ * This file is part of the ProxmoxVE PHP API wrapper library (unofficial).
+ *
+ * @copyright 2014 César Muñoz <zzantares@gmail.com>
+ * @license http://opensource.org/licenses/MIT The MIT License.
+ */
 
 $autoload = dirname(__DIR__) . '/vendor/autoload.php';
 

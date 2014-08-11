@@ -26,7 +26,7 @@ class AuthToken
 
 
     /**
-     * Random text used as CSRF prevention token by Proxmox in some requests.
+     * Random text used by Proxmox as CSRF prevention token in some requests.
      *
      * @see http://pve.proxmox.com/wiki/Proxmox_VE_API#Authentification
      * @var string
@@ -129,4 +129,6 @@ class AuthToken
     {
         return $this->timestamp + 7200 >= time();
     }
+
 }
+

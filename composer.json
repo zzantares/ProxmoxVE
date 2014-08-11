@@ -1,7 +1,7 @@
 {
     "name": "zzantares/proxmoxve",
     "type": "library",
-    "description": "A simple PHP 5.3+ Proxmox API client.",
+    "description": "A simple PHP 5.4+ Proxmox API client.",
     "keywords": ["Proxmox", "API", "KVM", "OpenVZ", "Virtualization"],
     "homepage": "https://github.com/ZzAntares/ProxmoxVE",
     "license": "MIT",
