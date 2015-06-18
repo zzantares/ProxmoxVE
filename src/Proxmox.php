@@ -161,6 +161,9 @@ class Proxmox
      */
     private function processHttpResponse($response)
     {
+        if($response->getStatusCode() != "200") {
+            throw new \Exception($response->getReasonPhrase());
+        }
         switch ($this->fakeType) {
             case 'pngb64':
                 $base64 = base64_encode($response->getBody());
