@@ -219,6 +219,4 @@ EOD;
 
         $this->assertEquals($proxmox->get('/nodes'), json_decode($fakeResponse, true));
     }
-
 }
-
