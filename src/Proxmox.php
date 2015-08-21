@@ -168,7 +168,7 @@ class Proxmox
                 break;
             case 'object': // 'object' not supported yet, we return array instead.
             case 'array':
-                return $response->json();
+                return json_decode($response->getBody(), true);
                 break;
             default:
                 return $response->getBody()->__toString();
@@ -210,7 +210,7 @@ class Proxmox
             ],
         ]);
 
-        $response = $response->json();
+        $response = json_decode($response->getBody(), true);
 
         if (!$response['data']) {
             $error = 'Can not login using credentials: ' . $this->credentials;
