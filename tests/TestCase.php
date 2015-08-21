@@ -53,18 +53,18 @@ class TestCase extends \PHPUnit_Framework_TestCase
     {
         if ($successfulLogin) {
             $data = '{"data":{"CSRFPreventionToken":"csrf","ticket":"ticket","username":"random"}}';
-            $login = "HTTP/1.1 202 OK\r\nContent-Length: 0\r\n\r\n{$data}";
+            $login = new \GuzzleHttp\Psr7\Response(202, ['Content-Length' => 0], $data);
         } else {
-            $login = "HTTP/1.1 400\r\nContent-Length: 0\r\n\r\n";
+            $login = new \GuzzleHttp\Psr7\Response(400, ['Content-Length' => 0]);
         }
 
-        $mock = new \GuzzleHttp\Subscriber\Mock([
+        $mock = new \GuzzleHttp\Handler\MockHandler([
             $login,
-            "HTTP/1.1 202 OK\r\nContent-Length: 0\r\n\r\n{$response}",
+            new \GuzzleHttp\Psr7\Response(202, ['Content-Length' => 0], $response),
         ]);
 
-        $httpClient = new \GuzzleHttp\Client();
-        $httpClient->getEmitter()->attach($mock);
+        $handler = \GuzzleHttp\HandlerStack::create($mock);
+        $httpClient = new \GuzzleHttp\Client(['handler' => $handler]);
 
         return $httpClient;
     }
