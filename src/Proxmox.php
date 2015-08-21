@@ -98,9 +98,9 @@ class Proxmox
     {
         $url = $this->getApiUrl() . $actionPath;
 
-        $cookies = [
-            'PVEAuthCookie' => $this->authToken->getTicket(),
-        ];
+        $cookies = new \GuzzleHttp\Cookie\CookieJar(false, [
+            ['PVEAuthCookie' => $this->authToken->getTicket()],
+        ]);
 
         if ($method != 'GET') {
             $headers = [
@@ -203,7 +203,7 @@ class Proxmox
         $response = $this->httpClient->post($loginUrl, [
             'verify' => false,
             'exceptions' => false,
-            'body' => [
+            'form_params' => [
                 'username' => $this->credentials->getUsername(),
                 'password' => $this->credentials->getPassword(),
                 'realm' => $this->credentials->getRealm(),
