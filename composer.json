@@ -22,7 +22,7 @@
     "require": {
         "php": ">=5.3.0",
         "lib-curl": "*",
-        "guzzlehttp/guzzle": "~4.0"
+        "guzzlehttp/guzzle": "~5.0"
     },
 
     "require-dev": {
