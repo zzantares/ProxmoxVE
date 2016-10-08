@@ -6,8 +6,6 @@ This **PHP 5.4+** library allows you to interact with your Proxmox server via AP
 [![Build Status](https://travis-ci.org/ZzAntares/ProxmoxVE.svg?branch=master)](https://travis-ci.org/ZzAntares/ProxmoxVE)
 [![Latest Stable Version](https://poser.pugx.org/zzantares/proxmoxve/v/stable.svg)](https://packagist.org/packages/zzantares/proxmoxve)
 [![Total Downloads](https://poser.pugx.org/zzantares/proxmoxve/downloads.svg)](https://packagist.org/packages/zzantares/proxmoxve)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/ZzAntares/ProxmoxVE/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/ZzAntares/ProxmoxVE/?branch=master)
-[![Code Coverage](https://scrutinizer-ci.com/g/ZzAntares/ProxmoxVE/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/ZzAntares/ProxmoxVE/?branch=master)
 [![Latest Unstable Version](https://poser.pugx.org/zzantares/proxmoxve/v/unstable.svg)](https://packagist.org/packages/zzantares/proxmoxve)
 [![License](https://poser.pugx.org/zzantares/proxmoxve/license.svg)](https://packagist.org/packages/zzantares/proxmoxve)
 
@@ -18,7 +16,7 @@ This **PHP 5.4+** library allows you to interact with your Proxmox server via AP
 Installation
 ------------
 
-Recomended installation is using [Composer], if you do not have [Composer] what are you waiting?
+Recommended installation is using [Composer], if you do not have [Composer] what are you waiting?
 
 In the root of your project execute the following:
 
@@ -93,7 +91,7 @@ Array
                     [maxmem] => 175168446464
                     [node] => mynode1
                     [maxcpu] => 24
-                    [level] => 
+                    [level] =>
                     [uptime] => 139376
                     [id] => node/mynode1
                     [type] => node
@@ -222,4 +220,3 @@ Upcoming features
 [ProxmoxVE API]:http://pve.proxmox.com/wiki/Proxmox_VE_API
 [Proxmox wiki]:http://pve.proxmox.com/wiki
 [Composer]:https://getcomposer.org/
-
