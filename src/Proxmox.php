@@ -9,8 +9,10 @@
 
 namespace ProxmoxVE;
 
+use GuzzleHttp\Client;
 use ProxmoxVE\Exception\MalformedCredentialsException;
 use ProxmoxVE\Exception\AuthenticationException;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * ProxmoxVE class. In order to interact with the proxmox server, the desired
@@ -54,6 +56,9 @@ class Proxmox
      */
     private $authToken;
 
+    /** @var  Client $httpClient */
+    private $httpClient;
+
 
     /**
      * Constructor.
@@ -61,10 +66,8 @@ class Proxmox
      * @param mixed $credentials Credentials object or associative array holding
      *                           the login data.
      *
-     * @throws \ProxmoxVE\Exception\MalformedCredentialsException If bad args
-     *                                                            supplied.
-     * @throws \ProxmoxVE\Exception\AuthenticationException If given credentials
-     *                                                      are not valid.
+     * @param string $responseType
+     * @param null $httpClient
      */
     public function __construct(
         $credentials,
@@ -89,7 +92,7 @@ class Proxmox
      * @param string $method     HTTP method used in the request, by default
      *                           'GET' method will be used.
      *
-     * @return \Guzzle\Http\Message\Response
+     * @return ResponseInterface
      *
      * @throws \InvalidArgumentException If the given HTTP method is not one of
      *                                   'GET', 'POST', 'PUT', 'DELETE',
@@ -106,7 +109,8 @@ class Proxmox
             $headers = [
                 'CSRFPreventionToken' => $this->authToken->getCsrf(),
             ];
-        }
+        } else
+            $headers = [];
 
         switch ($method) {
             case 'GET':
@@ -123,7 +127,7 @@ class Proxmox
                     'exceptions' => false,
                     'cookies' => $cookies,
                     'headers' => $headers,
-                    'body' => $params,
+                    'form_params' => $params,
                 ]);
                 break;
             case 'PUT':
@@ -132,7 +136,7 @@ class Proxmox
                     'exceptions' => false,
                     'cookies' => $cookies,
                     'headers' => $headers,
-                    'body' => $params,
+                    'form_params' => $params,
                 ]);
                 break;
             case 'DELETE':
@@ -141,7 +145,7 @@ class Proxmox
                     'exceptions' => false,
                     'cookies' => $cookies,
                     'headers' => $headers,
-                    'body' => $params,
+                    'form_params' => $params,
                 ]);
                 break;
             default:
@@ -154,7 +158,7 @@ class Proxmox
     /**
      * Parses the response to the desired return type.
      *
-     * @param string $response Response sent by the Proxmox server.
+     * @param ResponseInterface $response Response sent by the Proxmox server.
      *
      * @return mixed The parsed response, depending on the response type can be
      *               an array or a string.
@@ -163,12 +167,17 @@ class Proxmox
     {
         switch ($this->fakeType) {
             case 'pngb64':
-                $base64 = base64_encode($response->getBody());
+                $base64 = base64_encode($response->getBody()->__toString());
                 return 'data:image/png;base64,' . $base64;
                 break;
             case 'object': // 'object' not supported yet, we return array instead.
             case 'array':
-                return $response->json();
+                $result = json_decode($response->getBody()->__toString(), true);
+            if (json_last_error() == JSON_ERROR_NONE) {
+                return $result;
+            } else {
+                return $response;
+            }
                 break;
             default:
                 return $response->getBody()->__toString();
@@ -184,7 +193,7 @@ class Proxmox
      */
     public function setHttpClient($httpClient = null)
     {
-        $this->httpClient = $httpClient ?: new \GuzzleHttp\Client();
+        $this->httpClient = $httpClient ?: new Client();
     }
 
 
@@ -210,7 +219,7 @@ class Proxmox
             ],
         ]);
 
-        $response = $response->json();
+        $response = json_decode($response->getBody()->__toString(), true);
 
         if (!$response['data']) {
             $error = 'Can not login using credentials: ' . $this->credentials;

@@ -1,28 +1,34 @@
 {
-    "name": "zzantares/proxmoxve",
+    "name": "lumaserv/proxmoxve",
     "type": "library",
     "description": "A simple PHP 5.4+ Proxmox API client.",
     "keywords": ["Proxmox", "API", "KVM", "OpenVZ", "Virtualization"],
     "homepage": "https://github.com/ZzAntares/ProxmoxVE",
     "license": "MIT",
+    "version": "1.1",
 
     "authors": [
         {
             "name": "César Muñoz",
             "email": "zzantares@gmail.com",
             "role": "Developer"
+        },
+        {
+            "name": "LUMASERV Systems",
+            "email": "info@lumaserv.com",
+            "role": "Developer"
         }
     ],
 
     "support": {
-        "issues": "https://github.com/ZzAntares/ProxmoxVE/issues",
-        "source": "https://github.com/ZzAntares/ProxmoxVE"
+        "issues": "https://github.com/LUMASERV/ProxmoxVE/issues",
+        "source": "https://github.com/LUMASERV/ProxmoxVE"
     },
 
     "require": {
-        "php": ">=5.3.0",
+        "php": ">=5.5",
         "lib-curl": "*",
-        "guzzlehttp/guzzle": "~4.0"
+        "guzzlehttp/guzzle": "6.2.1"
     },
 
     "require-dev": {
