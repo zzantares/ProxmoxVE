@@ -1,9 +1,9 @@
 {
     "name": "lumaserv/proxmoxve",
     "type": "library",
-    "description": "A simple PHP 5.4+ Proxmox API client.",
+    "description": "A simple PHP 5.5+ Proxmox API client.",
     "keywords": ["Proxmox", "API", "KVM", "OpenVZ", "Virtualization"],
-    "homepage": "https://github.com/ZzAntares/ProxmoxVE",
+    "homepage": "https://github.com/LUMASERV/ProxmoxVE",
     "license": "MIT",
     "version": "v4.0.0",
 
