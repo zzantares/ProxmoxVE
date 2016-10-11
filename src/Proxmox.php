@@ -212,7 +212,7 @@ class Proxmox
         $response = $this->httpClient->post($loginUrl, [
             'verify' => false,
             'exceptions' => false,
-            'body' => [
+            'form_params' => [
                 'username' => $this->credentials->getUsername(),
                 'password' => $this->credentials->getPassword(),
                 'realm' => $this->credentials->getRealm(),
