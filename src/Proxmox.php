@@ -10,6 +10,8 @@
 namespace ProxmoxVE;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Cookie\SetCookie;
 use ProxmoxVE\Exception\MalformedCredentialsException;
 use ProxmoxVE\Exception\AuthenticationException;
 use Psr\Http\Message\ResponseInterface;
@@ -101,9 +103,13 @@ class Proxmox
     {
         $url = $this->getApiUrl() . $actionPath;
 
-        $cookies = [
-            'PVEAuthCookie' => $this->authToken->getTicket(),
-        ];
+        $jar = CookieJar::fromArray([
+            'PVEAuthCookie' => $this->authToken->getTicket()
+        ], null);
+
+//        $cookies = [
+//            'PVEAuthCookie' => $this->authToken->getTicket(),
+//        ];
 
         if ($method != 'GET') {
             $headers = [
@@ -117,7 +123,7 @@ class Proxmox
                 return $this->httpClient->get($url, [
                     'verify' => false,
                     'exceptions' => false,
-                    'cookies' => $cookies,
+                    'cookies' => $jar,
                     'query' => $params,
                 ]);
                 break;
@@ -125,7 +131,7 @@ class Proxmox
                 return $this->httpClient->post($url, [
                     'verify' => false,
                     'exceptions' => false,
-                    'cookies' => $cookies,
+                    'cookies' => $jar,
                     'headers' => $headers,
                     'form_params' => $params,
                 ]);
@@ -134,7 +140,7 @@ class Proxmox
                 return $this->httpClient->put($url, [
                     'verify' => false,
                     'exceptions' => false,
-                    'cookies' => $cookies,
+                    'cookies' => $jar,
                     'headers' => $headers,
                     'form_params' => $params,
                 ]);
@@ -143,7 +149,7 @@ class Proxmox
                 return $this->httpClient->delete($url, [
                     'verify' => false,
                     'exceptions' => false,
-                    'cookies' => $cookies,
+                    'cookies' => $jar,
                     'headers' => $headers,
                     'form_params' => $params,
                 ]);
