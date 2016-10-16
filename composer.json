@@ -5,7 +5,7 @@
     "keywords": ["Proxmox", "API", "KVM", "OpenVZ", "Virtualization"],
     "homepage": "https://github.com/LUMASERV/ProxmoxVE",
     "license": "MIT",
-    "version": "v4.0.1",
+    "version": "v4.0.2",
 
     "authors": [
         {
@@ -28,7 +28,7 @@
     "require": {
         "php": ">=5.5",
         "lib-curl": "*",
-        "guzzlehttp/guzzle": "6.2.1"
+        "guzzlehttp/guzzle": "~6.0"
     },
 
     "require-dev": {
