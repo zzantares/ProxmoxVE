@@ -21,7 +21,7 @@ Recomended installation is using [Composer], if you do not have [Composer] what 
 In the root of your project execute the following:
 
 ```sh
-$ composer require lumaserv/proxmoxve ~4.0.1
+$ composer require lumaserv/proxmoxve ~4.0.2
 ```
 
 Or add this to your `composer.json` file:
@@ -29,7 +29,7 @@ Or add this to your `composer.json` file:
 ```json
 {
     "require": {
-        "lumaserv/proxmoxve": "~4.0.1"
+        "lumaserv/proxmoxve": "~4.0.2"
     }
 }
 ```
