@@ -105,11 +105,7 @@ class Proxmox
 
         $jar = CookieJar::fromArray([
             'PVEAuthCookie' => $this->authToken->getTicket()
-        ], null);
-
-//        $cookies = [
-//            'PVEAuthCookie' => $this->authToken->getTicket(),
-//        ];
+        ], '.');
 
         if ($method != 'GET') {
             $headers = [
