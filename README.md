@@ -169,7 +169,8 @@ Consult the [ProxmoxVE API] article at the [Proxmox wiki].
 
 **I feel you're hiding some cool tricks! I need more docs!**
 
-See the [doc](https://github.com/ZzAntares/ProxmoxVE/tree/master/doc) directory for more detailed documentation, it's all in there I swear it... I think.
+See the project's [wiki](https://github.com/ZzAntares/ProxmoxVE/wiki) for a more
+detailed documentation, it's all in there I swear it... I think.
 
 
 License
@@ -207,13 +208,6 @@ If you feel guilty by using this open source software library for free, you can 
 
 > Or just cheer me up [@ZzAntares](https://twitter.com/ZzAntares).
 
-Upcoming features
-----
-
-- SSL support.
-- Save AuthToken data in serialized form to avoid ticket creation per request.
-- Use an abstracted OOP layer to access all Proxmox resources.
-- Code useful tests ¬_¬!
 
 [LICENSE]:./LICENSE
 [PVE2 API Documentation]:http://pve.proxmox.com/pve2-api-doc/
