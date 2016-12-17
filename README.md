@@ -13,6 +13,7 @@ This **PHP 5.4+** library allows you to interact with your Proxmox server via AP
 
 **Looking for a PHP 5.3 library version?** Search through the [releases](https://github.com/ZzAntares/ProxmoxVE/releases) one that fits your needs, I recommend using the [2.1.1](https://github.com/ZzAntares/ProxmoxVE/releases/tag/v2.1.1) version.
 
+
 Installation
 ------------
 
@@ -38,6 +39,7 @@ Then perform the installation:
 ```sh
 $ composer install --no-dev
 ```
+
 
 Usage
 -----
@@ -103,55 +105,11 @@ Array
 )
 ```
 
-Using custom credentials object
+
+Want to know more nifty tricks?
 -------------------------------
 
-Also is possible to create a ProxmoxVE instance passing a custom object that has all related data needed to connect to the Proxmox server:
-
-```php
-<?php
-// Once again require the autoloader
-require_once 'vendor/autoload.php';
-
-// Sample custom credentials class
-class CustomCredentials
-{
-    public function __construct($host, $user, $pass)
-    {
-        $this->hostname = $host;
-        $this->username = $user;
-        $this->password = $pass;
-    }
-}
-
-// Create ProxmoxVE instance by passing your custom credentials object
-$credentials = new CustomCredentials('proxmox.server.com', 'root', 'secret');
-$proxmox = new ProxmoxVE\Proxmox($credentials);
-
-// Then you can use it, for example create a new user.
-
-// Define params
-$params = [
-    'userid' => 'new_user@pve',  // Proxmox requires to specify the realm (see the docs)
-    'comment' => 'Creating a new user',
-    'password' => 'canyoukeepasecret?',
-];
-
-// Send request passing params
-$result = $proxmox->create('/access/users', $params);
-
-// If an error occurred the 'errors' key will exist in the response array
-if (isset($result['errors'])) {
-    error_log('Unable to create new proxmox user.');
-    foreach ($result['errors'] as $title => $description) {
-        error_log($title . ': ' . $description);
-    }
-} else {
-    echo 'Successful user creation!';
-}
-```
-
-Using a custom credentials object is useful when your application uses some *ORM models* with the connecting data inside them, so you can pass for example an *Eloquent* model that holds the credentials inside.
+Checkout our [wiki](https://github.com/ZzAntares/ProxmoxVE/wiki).
 
 
 Docs
