@@ -1,7 +1,7 @@
 Welcome developers!
 ===================
 
-Before making any contribution you should now:
+Before making any contribution you should know:
 
 - All code contribution should follow PSR-1 and PSR-2 coding style standards. (Thanks to [Alexey Ashurok](https://github.com/aotd1))
 - You should code the tests for any function you add, some times is not possible but try doing it. Personally I like more the *black box* testing approach.
