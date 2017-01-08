@@ -98,9 +98,9 @@ class Proxmox
     {
         $url = $this->getApiUrl() . $actionPath;
 
-        $cookies = new \GuzzleHttp\Cookie\CookieJar(false, [
-            ['PVEAuthCookie' => $this->authToken->getTicket()],
-        ]);
+        $cookies = \GuzzleHttp\Cookie\CookieJar::fromArray([
+            'PVEAuthCookie' => $this->authToken->getTicket(),
+        ], $this->credentials->getHostname());
 
         if ($method != 'GET') {
             $headers = [
