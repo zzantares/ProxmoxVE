@@ -11,6 +11,7 @@ namespace ProxmoxVE;
 
 use ProxmoxVE\Exception\MalformedCredentialsException;
 use ProxmoxVE\Exception\AuthenticationException;
+use ProxmoxVE\Exception\BadResponseException;
 
 /**
  * ProxmoxVE class. In order to interact with the proxmox server, the desired
@@ -161,6 +162,9 @@ class Proxmox
      */
     private function processHttpResponse($response)
     {
+        if($response->getStatusCode() >= 400) {
+            throw new BadResponseException($response->getReasonPhrase());
+        }
         switch ($this->fakeType) {
             case 'pngb64':
                 $base64 = base64_encode($response->getBody());
