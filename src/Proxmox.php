@@ -123,7 +123,7 @@ class Proxmox
                     'exceptions' => false,
                     'cookies' => $cookies,
                     'headers' => $headers,
-                    'body' => $params,
+                    'form_params' => $params,
                 ]);
                 break;
             case 'PUT':
@@ -132,7 +132,7 @@ class Proxmox
                     'exceptions' => false,
                     'cookies' => $cookies,
                     'headers' => $headers,
-                    'body' => $params,
+                    'form_params' => $params,
                 ]);
                 break;
             case 'DELETE':
@@ -141,7 +141,7 @@ class Proxmox
                     'exceptions' => false,
                     'cookies' => $cookies,
                     'headers' => $headers,
-                    'body' => $params,
+                    'form_params' => $params,
                 ]);
                 break;
             default:
