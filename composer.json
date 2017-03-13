@@ -5,7 +5,7 @@
     "keywords": ["Proxmox", "API", "KVM", "OpenVZ", "Virtualization"],
     "homepage": "https://github.com/LUMASERV/ProxmoxVE",
     "license": "MIT",
-    "version": "v4.0.5",
+    "version": "v4.0.6",
 
     "authors": [
         {
