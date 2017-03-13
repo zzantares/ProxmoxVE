@@ -186,7 +186,6 @@ class Proxmox
         }
     }
 
-
     /**
      * Sets the HTTP client to be used to send requests over the network, for
      * now Guzzle needs to be used.
@@ -196,9 +195,9 @@ class Proxmox
     public function setHttpClient($httpClient = null)
     {
         $this->httpClient = $httpClient ?: new Client([
-            'timeout' => 1,
-            'connect_timeout' => 1,
-            'read_timeout' => 1
+            'timeout' => 5,
+            'connect_timeout' => 5,
+            'read_timeout' => 5
         ]);
     }
 
