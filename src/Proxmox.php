@@ -195,9 +195,9 @@ class Proxmox
     public function setHttpClient($httpClient = null)
     {
         $this->httpClient = $httpClient ?: new Client([
-            'timeout' => 5,
-            'connect_timeout' => 5,
-            'read_timeout' => 5
+            'timeout' => 30,
+            'connect_timeout' => 30,
+            'read_timeout' => 30
         ]);
     }
 
