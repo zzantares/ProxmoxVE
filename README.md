@@ -143,36 +143,6 @@ Want to contribute?
 Thank you! Take a look at the [CONTRIBUTING], you could easily set up a development environment to get you started in no time!
 
 
-Donations
----------
-
-If you feel guilty by using this open source software library for free, you can make a donation:
-
-[![Bitcoin](https://lh6.googleusercontent.com/-otZw6Z5QKfQ/U6tqGsLBWYI/AAAAAAAAB-8/kvXncUJKKpU/w100-h36-no/bitcoin_accepted_here2.png)](https://blockchain.info/address/12g5CxCnWTc2dfo2EozCvfhi4QaFRj1vsX)
-
-> 12g5CxCnWTc2dfo2EozCvfhi4QaFRj1vsX
-
-
-[![Litecoin](https://lh3.googleusercontent.com/-s0Z7VSNScBU/U6tqGnAU5DI/AAAAAAAAB-0/fqaowxhOoBg/w100-h36-no/litecoin-accepted2.jpg)](http://ltc.blockr.io/address/info/LZuAcxLX4CBCPfLRtixatwRh234jNm3EyS)
-
-> LZuAcxLX4CBCPfLRtixatwRh234jNm3EyS
-
-
-[![PayPal](https://lh5.googleusercontent.com/-bQoXNrSpb8M/U6tqGqAFQUI/AAAAAAAAB-4/OkjaZ2ZQCUc/w100-h26-no/pp-logo-100px.png)](https://www.paypal.com/mx/cgi-bin/webscr?cmd=%5fsend%2dmoney&nav=1)
-
-> zzantares@gmail.com
-
-
-[![Fork me on GitHub](https://lh4.googleusercontent.com/-02ApStd24fs/U6t2PxxAQVI/AAAAAAAACAE/koI2tECOE60/w81-h32-no/GitHubForkButton.png)](https://github.com/ZzAntares/ProxmoxVE/fork)
-
-> Fork and code! There is no better donation that your code contribution ;)
-
-
-[![@ZzAntares](https://lh4.googleusercontent.com/-y60LB84GXNk/U-gGlzNHUGI/AAAAAAAACDs/cuhszQOezYE/s50-no/twitter-logo.png)](https://twitter.com/ZzAntares)
-
-> Or just cheer me up [@ZzAntares](https://twitter.com/ZzAntares).
-
-
 [LICENSE]:./LICENSE
 [CONTRIBUTING]:./CONTRIBUTING.md
 [PVE2 API Documentation]:http://pve.proxmox.com/pve-docs/api-viewer/index.html
