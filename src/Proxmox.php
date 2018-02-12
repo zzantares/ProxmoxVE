@@ -118,7 +118,6 @@ class Proxmox
                     'exceptions' => false,
                     'cookies' => $cookies,
                     'query' => $params,
-                    //'debug' => true,
                 ]);
                 break;
             case 'POST':
@@ -128,7 +127,6 @@ class Proxmox
                     'cookies' => $cookies,
                     'headers' => $headers,
                     'form_params' => $params,
-                    //'debug' => true,
                 ]);
                 break;
             case 'PUT':
@@ -138,7 +136,6 @@ class Proxmox
                     'cookies' => $cookies,
                     'headers' => $headers,
                     'form_params' => $params,
-                    //'debug' => true,
                 ]);
                 break;
             case 'DELETE':
@@ -148,7 +145,6 @@ class Proxmox
                     'cookies' => $cookies,
                     'headers' => $headers,
                     'form_params' => $params,
-                    //'debug' => true,
                 ]);
                 break;
             default:
@@ -177,11 +173,6 @@ class Proxmox
                 $response = $response->getBody();
                 $response = json_decode($response);
                 $response = json_decode(json_encode($response), true); // recursively cast object to array
-
-                \Log::info('-----------START------------');
-                \Log::info(print_r($response, true));
-                \Log::info('-----------END------------');
-
                 
                 return $response;
                 //return $response->json();
