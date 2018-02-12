@@ -173,9 +173,7 @@ class Proxmox
                 $response = $response->getBody();
                 $response = json_decode($response);
                 $response = json_decode(json_encode($response), true); // recursively cast object to array
-                
                 return $response;
-                //return $response->json();
                 break;
             default:
                 return $response->getBody()->__toString();
