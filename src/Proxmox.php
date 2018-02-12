@@ -118,7 +118,7 @@ class Proxmox
                     'exceptions' => false,
                     'cookies' => $cookies,
                     'query' => $params,
-                    'debug' => true,
+                    //'debug' => true,
                 ]);
                 break;
             case 'POST':
@@ -128,7 +128,7 @@ class Proxmox
                     'cookies' => $cookies,
                     'headers' => $headers,
                     'form_params' => $params,
-                    'debug' => true,
+                    //'debug' => true,
                 ]);
                 break;
             case 'PUT':
@@ -138,7 +138,7 @@ class Proxmox
                     'cookies' => $cookies,
                     'headers' => $headers,
                     'form_params' => $params,
-                    'debug' => true,
+                    //'debug' => true,
                 ]);
                 break;
             case 'DELETE':
@@ -148,7 +148,7 @@ class Proxmox
                     'cookies' => $cookies,
                     'headers' => $headers,
                     'form_params' => $params,
-                    'debug' => true,
+                    //'debug' => true,
                 ]);
                 break;
             default:
