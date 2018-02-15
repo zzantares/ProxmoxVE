@@ -12,6 +12,8 @@ namespace ProxmoxVE;
 use ProxmoxVE\Exception\MalformedCredentialsException;
 use ProxmoxVE\Exception\AuthenticationException;
 
+use GuzzleHttp\Cookie\CookieJar;
+
 /**
  * ProxmoxVE class. In order to interact with the proxmox server, the desired
  * app's code needs to create and use an object of this class.
@@ -97,11 +99,12 @@ class Proxmox
     private function requestResource($actionPath, $params = [], $method = 'GET')
     {
         $url = $this->getApiUrl() . $actionPath;
-
-        $cookies = [
-            'PVEAuthCookie' => $this->authToken->getTicket(),
-        ];
-
+        $domain = parse_url($url);
+        
+        $cookies = CookieJar::fromArray([
+            'PVEAuthCookie' => $this->authToken->getTicket()
+        ],$domain['host']);
+        
         if ($method != 'GET') {
             $headers = [
                 'CSRFPreventionToken' => $this->authToken->getCsrf(),
@@ -123,7 +126,7 @@ class Proxmox
                     'exceptions' => false,
                     'cookies' => $cookies,
                     'headers' => $headers,
-                    'body' => $params,
+                    'form_params' => $params,
                 ]);
                 break;
             case 'PUT':
@@ -132,7 +135,7 @@ class Proxmox
                     'exceptions' => false,
                     'cookies' => $cookies,
                     'headers' => $headers,
-                    'body' => $params,
+                    'form_params' => $params,
                 ]);
                 break;
             case 'DELETE':
@@ -141,7 +144,7 @@ class Proxmox
                     'exceptions' => false,
                     'cookies' => $cookies,
                     'headers' => $headers,
-                    'body' => $params,
+                    'form_params' => $params,
                 ]);
                 break;
             default:
@@ -149,7 +152,6 @@ class Proxmox
                 throw new \InvalidArgumentException($errorMessage);
         }
     }
-
 
     /**
      * Parses the response to the desired return type.
@@ -168,7 +170,10 @@ class Proxmox
                 break;
             case 'object': // 'object' not supported yet, we return array instead.
             case 'array':
-                return $response->json();
+                $response = $response->getBody();
+                $response = json_decode($response);
+                $response = json_decode(json_encode($response), true); // recursively cast object to array
+                return $response;
                 break;
             default:
                 return $response->getBody()->__toString();
@@ -203,14 +208,16 @@ class Proxmox
         $response = $this->httpClient->post($loginUrl, [
             'verify' => false,
             'exceptions' => false,
-            'body' => [
+            'form_params' => [
                 'username' => $this->credentials->getUsername(),
                 'password' => $this->credentials->getPassword(),
                 'realm' => $this->credentials->getRealm(),
             ],
         ]);
-
-        $response = $response->json();
+        
+        $response = $response->getBody();
+        $response = json_decode($response);
+        $response = json_decode(json_encode($response), true); // recursively cast object to array
 
         if (!$response['data']) {
             $error = 'Can not login using credentials: ' . $this->credentials;
@@ -376,7 +383,7 @@ class Proxmox
         if (substr($actionPath, 0, 1) != '/') {
             $actionPath = '/' . $actionPath;
         }
-
+        
         $response = $this->requestResource($actionPath, $params, 'POST');
         return $this->processHttpResponse($response);
     }
