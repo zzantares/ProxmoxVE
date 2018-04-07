@@ -120,7 +120,6 @@ class Proxmox
                     'cookies' => $cookies,
                     'query' => $params,
                 ]);
-                break;
             case 'POST':
             case 'PUT':
             case 'DELETE':
@@ -135,7 +134,6 @@ class Proxmox
                     'form_params' => $params,
                 ]);
                 return $this->httpClient->send($request);
-                break;
             default:
                 $errorMessage = "HTTP Request method {$method} not allowed.";
                 throw new \InvalidArgumentException($errorMessage);
@@ -153,15 +151,18 @@ class Proxmox
      */
     private function processHttpResponse($response)
     {
+        if ($response === null)
+        {
+            return null;
+        }
+
         switch ($this->fakeType) {
             case 'pngb64':
                 $base64 = base64_encode($response->getBody());
                 return 'data:image/png;base64,' . $base64;
-                break;
             case 'object': // 'object' not supported yet, we return array instead.
             case 'array':
                 return json_decode($response->getBody(), true);
-                break;
             default:
                 return $response->getBody()->__toString();
         }
@@ -488,7 +489,7 @@ class Proxmox
      */
     public function getStorages($type = null)
     {
-        if (!$type) {
+        if ($type === null) {
             return $this->get('/storage');
         }
 
