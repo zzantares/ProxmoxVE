@@ -151,8 +151,7 @@ class Proxmox
      */
     private function processHttpResponse($response)
     {
-        if ($response === null)
-        {
+        if ($response === null) {
             return null;
         }
 
@@ -171,7 +170,7 @@ class Proxmox
 
     /**
      * Sets the HTTP client to be used to send requests over the network, for
-     * now Guzzle needs to be used.
+     * now Guzzle needs to be used.²
      *
      * @param \GuzzleHttp\Client $httpClient the client to be used
      */
