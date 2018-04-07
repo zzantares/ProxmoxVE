@@ -20,6 +20,27 @@ use ProxmoxVE\Exception\MalformedCredentialsException;
 class Credentials
 {
     /**
+     * @var string the Proxmox hostname.
+     */
+    private $hostname;
+    /**
+     * @var string the credentials username.
+     */
+    private $username;
+    /**
+     * @var string the credentials password.
+     */
+    private $password;
+    /**
+     * @var string the realm (usually pam).
+     */
+    private $realm;
+    /**
+     * @var string the Proxmox port (usually 8006).
+     */
+    private $port;
+
+    /**
      * Construct.
      *
      * @param array|object $credentials This needs to have 'hostname',
@@ -232,5 +253,7 @@ class Credentials
                 ];
             }
         }
+
+        return null;
     }
 }
