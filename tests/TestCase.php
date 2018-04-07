@@ -8,6 +8,11 @@
 
 namespace ProxmoxVE;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
+
 /**
  * @author César Muñoz <zzantares@gmail.com>
  */
@@ -52,19 +57,22 @@ class TestCase extends \PHPUnit_Framework_TestCase
     protected function getMockHttpClient($successfulLogin, $response = null)
     {
         if ($successfulLogin) {
-            $data = '{"data":{"CSRFPreventionToken":"csrf","ticket":"ticket","username":"random"}}';
-            $login = new \GuzzleHttp\Psr7\Response(202, ['Content-Length' => 0], $data);
+            $stream = \GuzzleHttp\Psr7\stream_for('{"data":{"CSRFPreventionToken":"csrf","ticket":"ticket","username":"random"}}');
+            $login = new Response(202, ['Content-Length' => 0], $stream);
         } else {
-            $login = new \GuzzleHttp\Psr7\Response(400, ['Content-Length' => 0]);
+            $login = new Response(400, ['Content-Length' => 0]);
         }
 
-        $mock = new \GuzzleHttp\Handler\MockHandler([
+        $responseStream = \GuzzleHttp\Psr7\stream_for("{$response}");
+
+        $mock = new MockHandler([
             $login,
-            new \GuzzleHttp\Psr7\Response(202, ['Content-Length' => 0], $response),
+            new Response(202, ['Content-Length' => 0], $responseStream),
         ]);
 
-        $handler = \GuzzleHttp\HandlerStack::create($mock);
-        $httpClient = new \GuzzleHttp\Client(['handler' => $handler]);
+
+        $handler = HandlerStack::create($mock);
+        $httpClient = new Client(['handler' => $handler]);
 
         return $httpClient;
     }
