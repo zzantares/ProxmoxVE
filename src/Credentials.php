@@ -51,12 +51,11 @@ class Credentials
     public function __toString()
     {
         return sprintf(
-            '[Host: %s:%s], [Username: %s@%s], [Password: %s].',
+            '[Host: %s:%s], [Username: %s@%s].',
             $this->hostname,
             $this->port,
             $this->username,
-            $this->realm,
-            $this->password
+            $this->realm
         );
     }
 
