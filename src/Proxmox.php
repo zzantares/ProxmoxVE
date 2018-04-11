@@ -126,14 +126,13 @@ class Proxmox
                 $headers = [
                     'CSRFPreventionToken' => $this->authToken->getCsrf(),
                 ];
-                $request = new Request($method, $url, [
+                return $this->httpClient->request($method, $url, [
                     'verify' => false,
                     'exceptions' => false,
                     'cookies' => $cookies,
                     'headers' => $headers,
                     'form_params' => $params,
                 ]);
-                return $this->httpClient->send($request);
             default:
                 $errorMessage = "HTTP Request method {$method} not allowed.";
                 throw new \InvalidArgumentException($errorMessage);
