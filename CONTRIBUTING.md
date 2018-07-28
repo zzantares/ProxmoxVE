@@ -3,9 +3,11 @@ Welcome developers!
 
 Before making any contribution you should know:
 
-- All code contribution should follow PSR-1 and PSR-2 coding style standards. (Thanks to [Alexey Ashurok](https://github.com/aotd1))
-- You should code the tests for any function you add, some times is not possible but try doing it. Personally I like more the *black box* testing approach.
-- All functions need to be properly documented, all comments, variable names, function names only on english language.
+- **Development of new features happens in the `develop` branch**, when this branch is stable enough it will merge with `master` and a new release will be made. Critical bug fixes can be applied directly to `master`.
+- In your fork you can add changes to which ever branch you want, but if you submit a PR do so against the `develop` branch or as a new branch altogether. **Any PR made to the `master` branch will be rejected (unless it contains a critical bug fix)**.
+- All **code contribution should follow PSR-1 and PSR-2** coding style standards. (Thanks to [Alexey Ashurok](https://github.com/aotd1))
+- You should **code the tests for any function you add**, some times is not possible but try doing it. Personally I like more the *black box* testing approach.
+- **All functions need to be properly documented**, all comments, variable names, function names only on english language.
 - Variables and functions names should be self descriptive.
 
 
@@ -48,4 +50,4 @@ Remember to use the container only to test the application, you can still code a
 What needs to be done?
 ----------------------
 
-What ever you think will improve this library and also let's wait the people to open issues and then we'll see.
+What ever you think will improve this library and also you could check out the open issues. Any help is gladly welcome, thanks for your consideration!
