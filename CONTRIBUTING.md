@@ -27,14 +27,14 @@ After you have cloned your forked project, and with docker installed on your mac
 
 ``` sh
 $ docker pull zzantares/php-proxmoxve
-$ docker run -v $(pwd):/root -it zzantares/php-proxmoxve
+$ docker run -v $(pwd):/root/proxmoxve -it zzantares/php-proxmoxve
 ```
 
-If you want to type more, the repository ships with a `Dockerfile` which also can be used by contributors in order to build that same image.
+Alternatively, the repository ships with a `Dockerfile` which also can be used by contributors in order to build that same image instead of pulling from the docker.io registry.
 
 ``` sh
 $ docker build -t php-proxmoxve .
-$ docker run -v $(pwd):/root -it php-proxmoxve
+$ docker run -v $(pwd):/root/proxmoxve -it php-proxmoxve
 ```
 
 Inside the container you have all the PHP extensions needed to develop PHP code for this project. The only step left is to install the project dependencies with composer:

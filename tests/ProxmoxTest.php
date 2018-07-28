@@ -28,7 +28,7 @@ class ProxmoxTest extends TestCase
     public function testExceptionIsThrownWhenNonAssociativeArrayIsGivenAsCredentials()
     {
         new Proxmox([
-            'root', 'So Bruce Wayne is alive? or did he die in the explosion?',
+            'root', 'So Bruce Wayne is alive? or did he died in the explosion?',
         ]);
     }
 
