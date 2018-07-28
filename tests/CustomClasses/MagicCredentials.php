@@ -18,6 +18,9 @@ class MagicCredentials
             case 'password':
                 return 'Magic World';
                 break;
+
+            default:
+                return null;
         }
     }
 }

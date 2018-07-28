@@ -1,7 +1,7 @@
 ProxmoxVE API Client
 ====================
 
-This **PHP 5.4+** library allows you to interact with your Proxmox server via API.
+This **PHP 5.5+** library allows you to interact with your Proxmox server via API.
 
 [![Build Status](https://travis-ci.org/ZzAntares/ProxmoxVE.svg?branch=master)](https://travis-ci.org/ZzAntares/ProxmoxVE)
 [![Latest Stable Version](https://poser.pugx.org/zzantares/proxmoxve/v/stable.svg)](https://packagist.org/packages/zzantares/proxmoxve)

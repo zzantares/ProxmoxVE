@@ -14,31 +14,31 @@ namespace ProxmoxVE;
 class ProxmoxTest extends TestCase
 {
     /**
-     * @expectedException ProxmoxVE\Exception\MalformedCredentialsException
+     * @expectedException \ProxmoxVE\Exception\MalformedCredentialsException
      */
     public function testExceptionIsThrownIfBadParamsPassed()
     {
-        $proxmox = new Proxmox('bad param');
+        new Proxmox('bad param');
     }
 
 
     /**
-     * @expectedException ProxmoxVE\Exception\MalformedCredentialsException
+     * @expectedException \ProxmoxVE\Exception\MalformedCredentialsException
      */
     public function testExceptionIsThrownWhenNonAssociativeArrayIsGivenAsCredentials()
     {
-        $proxmox = new Proxmox([
+        new Proxmox([
             'root', 'So Bruce Wayne is alive? or did he die in the explosion?',
         ]);
     }
 
 
     /**
-     * @expectedException ProxmoxVE\Exception\MalformedCredentialsException
+     * @expectedException \ProxmoxVE\Exception\MalformedCredentialsException
      */
     public function testExceptionIsThrownWhenIncompleteCredentialsArrayIsPassed()
     {
-        $proxmox = new Proxmox([
+        new Proxmox([
             'username' => 'root',
             'password' => 'The NSA is watching us! D=',
         ]);
@@ -46,42 +46,42 @@ class ProxmoxTest extends TestCase
 
 
     /**
-     * @expectedException ProxmoxVE\Exception\MalformedCredentialsException
+     * @expectedException \ProxmoxVE\Exception\MalformedCredentialsException
      */
     public function testExceptionIsThrownWhenWrongCredentialsObjectIsPassed()
     {
         $credentials = new CustomClasses\Person('Harry Potter', 13);
-        $proxmox = new Proxmox($credentials);
+        new Proxmox($credentials);
     }
 
 
     /**
-     * @expectedException ProxmoxVE\Exception\MalformedCredentialsException
+     * @expectedException \ProxmoxVE\Exception\MalformedCredentialsException
      */
     public function testExceptionIsThrownWhenIncompleteCredentialsObjectIsPassed()
     {
         $credentials = new CustomClasses\IncompleteCredentials("user", "and that's it");
-        $proxmox = new Proxmox($credentials);
+        new Proxmox($credentials);
     }
 
 
     /**
-     * @expectedException ProxmoxVE\Exception\MalformedCredentialsException
+     * @expectedException \ProxmoxVE\Exception\MalformedCredentialsException
      */
     public function testExceptionIsThrownWhenProtectedCredentialsObjectIsPassed()
     {
         $credentials = new CustomClasses\ProtectedCredentials('host', 'user', 'pass');
-        $proxmox = new Proxmox($credentials);
+        new Proxmox($credentials);
     }
 
 
     /**
-     * @expectedException GuzzleHttp\Exception\RequestException
+     * @expectedException \GuzzleHttp\Exception\RequestException
      */
     public function testProxmoxExceptionIsNotThrownWhenUsingMagicCredentialsObject()
     {
         $credentials = new CustomClasses\MagicCredentials();
-        $proxmox = new Proxmox($credentials);
+        new Proxmox($credentials);
     }
 
 
@@ -99,16 +99,16 @@ class ProxmoxTest extends TestCase
 
         $credentials = $proxmox->getCredentials();
 
-        $this->assertEquals($credentials->hostname, $ids['hostname']);
-        $this->assertEquals($credentials->username, $ids['username']);
-        $this->assertEquals($credentials->password, $ids['password']);
-        $this->assertEquals($credentials->realm, 'pam');
-        $this->assertEquals($credentials->port, '8006');
+        $this->assertEquals($credentials->getHostname(), $ids['hostname']);
+        $this->assertEquals($credentials->getUsername(), $ids['username']);
+        $this->assertEquals($credentials->getPassword(), $ids['password']);
+        $this->assertEquals($credentials->getRealm(), 'pam');
+        $this->assertEquals($credentials->getPort(), '8006');
     }
 
 
     /**
-     * @expectedException Exception
+     * @expectedException \Exception
      */
     public function testUnresolvedHostnameThrowsException()
     {
@@ -118,12 +118,12 @@ class ProxmoxTest extends TestCase
             'password' => 'pass',
         ];
 
-        $proxmox = new Proxmox($credentials);
+        new Proxmox($credentials);
     }
 
 
     /**
-     * @expectedException ProxmoxVE\Exception\AuthenticationException
+     * @expectedException \ProxmoxVE\Exception\AuthenticationException
      */
     public function testLoginErrorThrowsException()
     {
@@ -135,7 +135,7 @@ class ProxmoxTest extends TestCase
 
         $httpClient = $this->getMockHttpClient(false); // Simulate failed login
 
-        $proxmox = new Proxmox($credentials, null, $httpClient);
+        new Proxmox($credentials, null, $httpClient);
     }
 
 
@@ -171,7 +171,7 @@ class ProxmoxTest extends TestCase
 
 
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException \InvalidArgumentException
      */
     public function testGetResourceWithBadParamsThrowsException()
     {
@@ -181,7 +181,7 @@ class ProxmoxTest extends TestCase
 
 
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException \InvalidArgumentException
      */
     public function testCreateResourceWithBadParamsThrowsException()
     {
@@ -191,7 +191,7 @@ class ProxmoxTest extends TestCase
 
 
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException \InvalidArgumentException
      */
     public function testSetResourceWithBadParamsThrowsException()
     {
@@ -201,7 +201,7 @@ class ProxmoxTest extends TestCase
 
 
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException \InvalidArgumentException
      */
     public function testDeleteResourceWithBadParamsThrowsException()
     {
@@ -219,6 +219,4 @@ EOD;
 
         $this->assertEquals($proxmox->get('/nodes'), json_decode($fakeResponse, true));
     }
-
 }
-
