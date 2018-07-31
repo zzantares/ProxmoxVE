@@ -204,7 +204,7 @@ class Proxmox
         $json = json_decode($response->getBody(), true);
 
         if (!$json['data']) {
-            $error = 'Can not login using credentials: ' . $this->credentials;
+            $error = 'Can not login using the provided credentials';
             throw new AuthenticationException($error);
         }
 
