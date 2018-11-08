@@ -155,7 +155,7 @@ class Proxmox
             return null;
         }
 
-        if($response->getStatusCode() >= 400) {
+        if ($response->getStatusCode() >= 400) {
             throw new BadResponseException($response->getReasonPhrase());
         }
 
