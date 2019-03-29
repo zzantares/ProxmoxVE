@@ -45,7 +45,7 @@ class Credentials
     private $port;
 
     /**
-     * @var string  The Proxmox connection timeout (second)
+     * @var Integer The Proxmox connection timeout (second)
      */
     private $timeout;
 
@@ -201,9 +201,9 @@ class Credentials
                 $credentials['port'] = '8006';
             }
 
-            // timeout default value 30s
+            // timeout default value 0
             if (!isset($credentials['timeout'])) {
-                $credentials['timeout'] = '30';
+                $credentials['timeout'] = 0;
             }
 
             return $credentials;
@@ -230,7 +230,7 @@ class Credentials
 
             $timeout = in_array('timeout', $objectProperties)
                 ? $credentials->timeout
-                : '30';
+                : 0;
 
             return [
                 'hostname' => $credentials->hostname,
@@ -260,7 +260,7 @@ class Credentials
 
             $timeout = method_exists($credentials, 'getTimeout')
                 ? $credentials->getTimeout()
-                : '30';
+                : 0;
 
             return [
                 'hostname' => $credentials->getHostname(),
@@ -285,7 +285,7 @@ class Credentials
                     'password' => $credentials->password,
                     'realm' => $credentials->realm ?: 'pam',
                     'port' => $credentials->port ?: '8006',
-                    'timeout' => $credentials->timeout ?: '30',
+                    'timeout' => $credentials->timeout ?: 0,
                 ];
             }
         }
