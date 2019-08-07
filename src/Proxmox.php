@@ -158,7 +158,6 @@ class Proxmox
      */
     private function processHttpResponse($response)
     {
-        var_dump($response);
         if ($response === null) {
             return null;
         }
