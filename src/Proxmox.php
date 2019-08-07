@@ -27,6 +27,11 @@ class Proxmox
      * @var \GuzzleHttp\Client()
      */
     private $httpClient;
+    
+    /**
+     * @var bool
+     */
+    private $throwHttpExceptions = false;
 
     /**
      * Contains the proxmox server authentication data.
@@ -79,7 +84,8 @@ class Proxmox
     public function __construct(
         $credentials,
         $responseType = 'array',
-        $httpClient = null
+        $httpClient = null,
+        $throwHttpExceptions = false
     ) {
         $this->setHttpClient($httpClient);
 
@@ -87,6 +93,8 @@ class Proxmox
         $this->setCredentials($credentials);
 
         $this->setResponseType($responseType);
+        
+        $this->throwHttpExceptions = $throwHttpExceptions;
     }
 
 
@@ -116,7 +124,7 @@ class Proxmox
             case 'GET':
                 return $this->httpClient->get($url, [
                     'verify' => false,
-                    'exceptions' => false,
+                    'exceptions' => $this->throwHttpExceptions,
                     'cookies' => $cookies,
                     'query' => $params,
                 ]);
@@ -128,7 +136,7 @@ class Proxmox
                 ];
                 return $this->httpClient->request($method, $url, [
                     'verify' => false,
-                    'exceptions' => false,
+                    'exceptions' => $this->throwHttpExceptions,
                     'cookies' => $cookies,
                     'headers' => $headers,
                     'form_params' => $params,
@@ -150,6 +158,7 @@ class Proxmox
      */
     private function processHttpResponse($response)
     {
+        var_dump($response);
         if ($response === null) {
             return null;
         }
@@ -193,7 +202,7 @@ class Proxmox
         $loginUrl = $this->credentials->getApiUrl() . '/json/access/ticket';
         $response = $this->httpClient->post($loginUrl, [
             'verify' => false,
-            'exceptions' => false,
+            'exceptions' => $this->throwHttpExceptions,
             'form_params' => [
                 'username' => $this->credentials->getUsername(),
                 'password' => $this->credentials->getPassword(),
