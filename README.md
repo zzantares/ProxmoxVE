@@ -9,7 +9,7 @@ This **PHP 5.5+** library allows you to interact with your Proxmox server via AP
 [![Latest Unstable Version](https://poser.pugx.org/zzantares/proxmoxve/v/unstable.svg)](https://packagist.org/packages/zzantares/proxmoxve)
 [![License](https://poser.pugx.org/zzantares/proxmoxve/license.svg)](https://packagist.org/packages/zzantares/proxmoxve)
 
-> If you find any errors, typos or you detect that something is not working as expected please open an [issue](https://github.com/ZzAntares/ProxmoxVE/issues/new) or tweetme [@ZzAntares](https://twitter.com/ZzAntares). I'll try to release a fix asap.
+> I'm not actively maintaining this library anymore (I've left PHP behind) but **the API is pretty stable**, if it doesn't suit your needs take a look at the forks or better yet create a PR to add the things you're missing, if you're interested I can transfer the project to you.
 
 **Looking for a PHP 5.3 library version?** Search through the [releases](https://github.com/ZzAntares/ProxmoxVE/releases) one that fits your needs, I recommend using the [2.1.1](https://github.com/ZzAntares/ProxmoxVE/releases/tag/v2.1.1) version.
 
