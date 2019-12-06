@@ -199,6 +199,7 @@ class Proxmox
                 'password' => $this->credentials->getPassword(),
                 'realm' => $this->credentials->getRealm(),
             ],
+            'timeout' => $this->credentials->getTimeout(),
         ]);
 
         $json = json_decode($response->getBody(), true);

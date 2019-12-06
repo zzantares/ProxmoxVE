@@ -45,6 +45,11 @@ class Credentials
     private $port;
 
     /**
+     * @var Integer The Proxmox connection timeout (second)
+     */
+    private $timeout;
+
+    /**
      * Construct.
      *
      * @param array|object $credentials This needs to have 'hostname',
@@ -65,6 +70,7 @@ class Credentials
         $this->password = $credentials['password'];
         $this->realm = $credentials['realm'];
         $this->port = $credentials['port'];
+        $this->timeout = $credentials['timeout'];
     }
 
 
@@ -76,11 +82,12 @@ class Credentials
     public function __toString()
     {
         return sprintf(
-            '[Host: %s:%s], [Username: %s@%s].',
+            '[Host: %s:%s], [Username: %s@%s], [Timeout: %s]',
             $this->hostname,
             $this->port,
             $this->username,
-            $this->realm
+            $this->realm,
+            $this->timeout
         );
     }
 
@@ -152,6 +159,16 @@ class Credentials
 
 
     /**
+     * Gets the timeout configured in this credentials object.
+     *
+     * @return string The timeout in the credentials.
+     */
+    public function getTimeout()
+    {
+        return $this->timeout;
+    }
+
+    /**
      * Given the custom credentials object it will try to find the required
      * values to use it as the proxmox credentials, this can be an object with
      * accesible properties, getter methods or an object that uses '__get' to
@@ -184,6 +201,11 @@ class Credentials
                 $credentials['port'] = '8006';
             }
 
+            // timeout default value 0
+            if (!isset($credentials['timeout'])) {
+                $credentials['timeout'] = 0;
+            }
+
             return $credentials;
         }
 
@@ -206,12 +228,17 @@ class Credentials
                 ? $credentials->port
                 : '8006';
 
+            $timeout = in_array('timeout', $objectProperties)
+                ? $credentials->timeout
+                : 0;
+
             return [
                 'hostname' => $credentials->hostname,
                 'username' => $credentials->username,
                 'password' => $credentials->password,
                 'realm' => $realm,
                 'port' => $port,
+                'timeout' => $timeout,
             ];
         }
 
@@ -231,12 +258,17 @@ class Credentials
                 ? $credentials->getPort()
                 : '8006';
 
+            $timeout = method_exists($credentials, 'getTimeout')
+                ? $credentials->getTimeout()
+                : 0;
+
             return [
                 'hostname' => $credentials->getHostname(),
                 'username' => $credentials->getUsername(),
                 'password' => $credentials->getPassword(),
                 'realm' => $realm,
                 'port' => $port,
+                'timeout' => $timeout,
             ];
         }
 
@@ -253,6 +285,7 @@ class Credentials
                     'password' => $credentials->password,
                     'realm' => $credentials->realm ?: 'pam',
                     'port' => $credentials->port ?: '8006',
+                    'timeout' => $credentials->timeout ?: 0,
                 ];
             }
         }
