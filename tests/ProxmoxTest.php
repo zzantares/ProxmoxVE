@@ -104,6 +104,26 @@ class ProxmoxTest extends TestCase
         $this->assertEquals($credentials->getPassword(), $ids['password']);
         $this->assertEquals($credentials->getRealm(), 'pam');
         $this->assertEquals($credentials->getPort(), '8006');
+        $this->assertEquals($credentials->getSystem(), 'pve');
+    }
+
+
+    public function testCredentialsWithMailGatewaySystem()
+    {
+        $ids = [
+            'hostname' => 'some.proxmox.tld',
+            'username' => 'root',
+            'password' => 'I was here',
+            'system' => 'pmg',
+        ];
+
+        $fakeAuthToken = new AuthToken('csrf', 'ticket', 'username');
+        $proxmox = $this->getMockProxmox('login', $fakeAuthToken);
+        $proxmox->setCredentials($ids);
+
+        $credentials = $proxmox->getCredentials();
+
+        $this->assertEquals($credentials->getSystem(), 'pmg');
     }
 
 

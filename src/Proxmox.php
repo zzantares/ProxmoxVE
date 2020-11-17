@@ -109,7 +109,7 @@ class Proxmox
         $url = $this->getApiUrl() . $actionPath;
 
         $cookies = CookieJar::fromArray([
-            'PVEAuthCookie' => $this->authToken->getTicket(),
+            $this->getCookieName() => $this->authToken->getTicket(),
         ], $this->credentials->getHostname());
 
         switch ($method) {
@@ -164,6 +164,23 @@ class Proxmox
             default:
                 return $response->getBody()->__toString();
         }
+    }
+
+
+    /**
+     * Returns the name of the cookie that should be used to authenticate requests.
+     *
+     * @return string The required cookie for the system being used
+     */
+    private function getCookieName()
+    {
+        switch ($this->credentials->getSystem()) {
+            default:
+            case 'pve': $cookiename = 'PVEAuthCookie'; break;
+            case 'pmg': $cookiename = 'PMGAuthCookie'; break;
+        }
+
+        return $cookiename;
     }
 
 

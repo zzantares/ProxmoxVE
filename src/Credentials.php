@@ -45,6 +45,11 @@ class Credentials
     private $port;
 
     /**
+     * @var string The Proxmox system being used (defaults to "pve" if not provided).
+     */
+    private $system;
+
+    /**
      * Construct.
      *
      * @param array|object $credentials This needs to have 'hostname',
@@ -65,6 +70,7 @@ class Credentials
         $this->password = $credentials['password'];
         $this->realm = $credentials['realm'];
         $this->port = $credentials['port'];
+        $this->system = $credentials['system'];
     }
 
 
@@ -152,6 +158,17 @@ class Credentials
 
 
     /**
+     * Gets the system configured in this credentials object.
+     *
+     * @return string The port in the credentials.
+     */
+    public function getSystem()
+    {
+        return $this->system;
+    }
+
+
+    /**
      * Given the custom credentials object it will try to find the required
      * values to use it as the proxmox credentials, this can be an object with
      * accesible properties, getter methods or an object that uses '__get' to
@@ -184,6 +201,10 @@ class Credentials
                 $credentials['port'] = '8006';
             }
 
+            if (!isset($credentials['system'])) {
+                $credentials['system'] = 'pve';
+            }
+
             return $credentials;
         }
 
@@ -206,12 +227,17 @@ class Credentials
                 ? $credentials->port
                 : '8006';
 
+            $system = in_array('system', $objectProperties)
+                ? $credentials->system
+                : 'pve';
+
             return [
                 'hostname' => $credentials->hostname,
                 'username' => $credentials->username,
                 'password' => $credentials->password,
                 'realm' => $realm,
                 'port' => $port,
+                'system' => $system,
             ];
         }
 
@@ -231,12 +257,17 @@ class Credentials
                 ? $credentials->getPort()
                 : '8006';
 
+            $system = method_exists($credentials, 'getSystem')
+                ? $credentials->getSystem()
+                : 'pve';
+
             return [
                 'hostname' => $credentials->getHostname(),
                 'username' => $credentials->getUsername(),
                 'password' => $credentials->getPassword(),
                 'realm' => $realm,
                 'port' => $port,
+                'system' => $system,
             ];
         }
 
@@ -253,6 +284,7 @@ class Credentials
                     'password' => $credentials->password,
                     'realm' => $credentials->realm ?: 'pam',
                     'port' => $credentials->port ?: '8006',
+                    'system' => $credentials->system ?: 'pve',
                 ];
             }
         }
