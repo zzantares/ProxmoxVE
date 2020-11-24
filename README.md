@@ -105,6 +105,22 @@ Array
 )
 ```
 
+Using the MailGateway API
+-------------------------
+
+This library can be used to communicate with the [Proxmox MailGateway API](https://pmg.proxmox.com/pmg-docs/api-viewer/index.html) as well, by simply changing the `system` entry in the credentials array.
+
+```php
+<?php
+
+$credentials = [
+    'hostname' => 'proxmox.server.com',  // Also can be an IP
+    'username' => 'root',
+    'password' => 'secret',
+    'system' => 'pmg', // Defaults to 'pve' for the PVE API. Use 'pmg' for the PMG API.
+];
+
+```
 
 Want to know more nifty tricks?
 -------------------------------
