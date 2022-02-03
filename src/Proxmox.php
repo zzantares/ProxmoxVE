@@ -117,7 +117,7 @@ class Proxmox
             case 'GET':
                 return $this->httpClient->get($url, [
                     'verify' => false,
-                    'exceptions' => false,
+                    'http_errors' => false,
                     'cookies' => $cookies,
                     'query' => $params,
                 ]);
@@ -129,7 +129,7 @@ class Proxmox
                 ];
                 return $this->httpClient->request($method, $url, [
                     'verify' => false,
-                    'exceptions' => false,
+                    'http_errors' => false,
                     'cookies' => $cookies,
                     'headers' => $headers,
                     'form_params' => $params,
@@ -215,7 +215,7 @@ class Proxmox
         $loginUrl = $this->credentials->getApiUrl() . '/json/access/ticket';
         $response = $this->httpClient->post($loginUrl, [
             'verify' => false,
-            'exceptions' => false,
+            'http_errors' => false,
             'form_params' => [
                 'username' => $this->credentials->getUsername(),
                 'password' => $this->credentials->getPassword(),
