@@ -14,6 +14,7 @@ use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Psr7\Request;
 
 use ProxmoxVE\Exception\AuthenticationException;
+use ProxmoxVE\Exception\BadResponseException;
 
 /**
  * ProxmoxVE class. In order to interact with the proxmox server, the desired
@@ -152,6 +153,10 @@ class Proxmox
     {
         if ($response === null) {
             return null;
+        }
+
+        if ($response->getStatusCode() >= 400) {
+            throw new BadResponseException($response->getReasonPhrase());
         }
 
         switch ($this->fakeType) {
