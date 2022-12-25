@@ -121,6 +121,22 @@ $credentials = [
 ];
 
 ```
+Using the backup Server API
+-------------------------
+
+This library can be used to communicate with the [Proxmox Backup Server API](https://pbs.proxmox.com/docs/api-viewer/index.html) as well, by simply changing the `system` entry in the credentials array.
+
+```php
+<?php
+
+$credentials = [
+    'hostname' => 'proxmox.server.com',  // Also can be an IP
+    'username' => 'root',
+    'password' => 'secret',
+    'system' => 'pbs', // Defaults to 'pve' for the PVE API. Use 'pbs' for the PBS API.
+];
+
+```
 
 Want to know more nifty tricks?
 -------------------------------

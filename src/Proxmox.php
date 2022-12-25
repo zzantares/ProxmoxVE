@@ -183,6 +183,7 @@ class Proxmox
             default:
             case 'pve': $cookiename = 'PVEAuthCookie'; break;
             case 'pmg': $cookiename = 'PMGAuthCookie'; break;
+            case 'pbs': $cookiename = 'PBSAuthCookie'; break;
         }
 
         return $cookiename;
