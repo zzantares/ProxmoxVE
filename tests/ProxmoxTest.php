@@ -125,6 +125,24 @@ class ProxmoxTest extends TestCase
 
         $this->assertEquals($credentials->getSystem(), 'pmg');
     }
+    
+    public function testCredentialsWithBackupServerSystem()
+    {
+        $ids = [
+            'hostname' => 'some.proxmox.tld',
+            'username' => 'root',
+            'password' => 'I was here',
+            'system' => 'pbs',
+        ];
+
+        $fakeAuthToken = new AuthToken('csrf', 'ticket', 'username');
+        $proxmox = $this->getMockProxmox('login', $fakeAuthToken);
+        $proxmox->setCredentials($ids);
+
+        $credentials = $proxmox->getCredentials();
+
+        $this->assertEquals($credentials->getSystem(), 'pbs');
+    }
 
 
     /**
