@@ -133,7 +133,7 @@ $credentials = [
     'hostname' => 'proxmox.server.com',  // Also can be an IP
     'username' => 'root',
     'password' => 'secret',
-    'system' => 'pbs', // Defaults to 'pve' for the PVE API. Use 'pmg' for the PMG API.
+    'system' => 'pbs', // Defaults to 'pve' for the PVE API. Use 'pbs' for the PBS API.
 ];
 
 ```
